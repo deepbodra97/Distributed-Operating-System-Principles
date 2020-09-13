@@ -8,30 +8,6 @@ open Akka.Configuration
 open Akka.FSharp
 // open Akka.TestKit
 
-// let system = ActorSystem.Create("Project1")
-
-// let echoServer = 
-//     spawn system "EchoServer"
-//     <| fun mailbox ->
-//             actor {
-//                 let! message = mailbox.Receive()
-
-//                 let SumOfConsecutiveSquare n =
-//                     n * (n+1.0) * (2.0 * n + 1.0) / 6.0
-
-//                 let IsPerfectSquare n =
-//                     let flooredSquare = n |> double |> sqrt |> floor |> int
-//                     n =  flooredSquare * flooredSquare
-
-//                 let ConsecutivePerfectSquareCumulativeSum n k =
-//                     for start in [1.0 .. n] do
-//                         let isPerfectSquare = SumOfConsecutiveSquare(start+k-1.0) - SumOfConsecutiveSquare(start-1.0) |> int |> IsPerfectSquare
-//                         match isPerfectSquare with
-//                         | true -> printfn "%d" <| int start
-//                         | false -> printf ""
-//                 ConsecutivePerfectSquareCumulativeSum 40.0 24.0 
-//             }
-
 type CustomException() =
     inherit Exception()
 
@@ -45,6 +21,7 @@ type JobParams = {
 
 type Message =
     | JobParams of JobParams
+    | Stop
     | Crash
 
 let main() =
@@ -69,6 +46,8 @@ let main() =
                         match isPerfectSquare with
                         | true -> printfn "%d" <| int start
                         | false -> printf ""
+                    // childMailbox.Sender().Forward(Stop)
+                    childMailbox.Context.Stop(childMailbox.Self)
                 ConsecutivePerfectSquareCumulativeSum param.start param.stop param.step
                 // printfn "%s" response
                 // childMailbox.Sender() <! response
@@ -102,8 +81,6 @@ let main() =
                                     let childParams = JobParams{start=tempStart ; stop=tempStart+workUnit-1.0 ; step=param.step; nActors=param.nActors}
                                     tempStart <- tempStart + workUnit
                                     childRef.Forward(childParams)
-                            // let childRef = spawn parentMailbox ("child" + string 1) child
-                            // childRef.Forward(msg)  // forward all messages through
                         return! parentLoop()
                     }
                 parentLoop()
@@ -116,9 +93,11 @@ let main() =
                     | _ -> SupervisorStrategy.DefaultDecider.Decide(e)))  ]
 
     async {
-        let param = JobParams {start=1.0 ; stop=40.0 ; step=24.0; nActors=2.0}
-        let! response = parent <? param
-        printfn "%s" response
+        let param = JobParams {start=1.0 ; stop=40.0 ; step=24.0; nActors=4.0}
+        // let param = JobParams {start=1.0 ; stop=100000000.0 ; step=20.0; nActors=10.0}
+        // let! response = parent <? param
+        // printfn "%s" response
+        parent <! param
         system.Terminate()
     } |> Async.RunSynchronously |> ignore
     // let param = {start=1.0 ; stop=40.0 ; step=24.0; nActors=2.0}
