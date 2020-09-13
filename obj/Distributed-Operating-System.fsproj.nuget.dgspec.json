@@ -1,0 +1,64 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\Workspace\\F#\\Distributed-Operating-System\\Distributed-Operating-System.fsproj": {}
+  },
+  "projects": {
+    "D:\\Workspace\\F#\\Distributed-Operating-System\\Distributed-Operating-System.fsproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Workspace\\F#\\Distributed-Operating-System\\Distributed-Operating-System.fsproj",
+        "projectName": "Distributed-Operating-System",
+        "projectPath": "D:\\Workspace\\F#\\Distributed-Operating-System\\Distributed-Operating-System.fsproj",
+        "packagesPath": "C:\\Users\\Deepb\\.nuget\\packages\\",
+        "outputPath": "D:\\Workspace\\F#\\Distributed-Operating-System\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\Deepb\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {}
+          }
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "Akka": {
+              "target": "Package",
+              "version": "[1.4.10, )"
+            },
+            "FSharp.Core": {
+              "target": "Package",
+              "version": "[4.7.2, )",
+              "generatePathProperty": true
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.401\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
