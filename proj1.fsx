@@ -1,6 +1,7 @@
 #time "on"
 #r "nuget: Akka.FSharp" 
-#r "nuget: Akka.TestKit" 
+#r "nuget: Akka.Remote"
+#r "nuget: Akka.TestKit"
 
 open System
 open Akka.Actor
@@ -8,8 +9,37 @@ open Akka.Configuration
 open Akka.FSharp
 // open Akka.TestKit
 
-type CustomException() =
-    inherit Exception()
+let configuration = 
+    ConfigurationFactory.ParseString(
+        @"akka {
+            // log-config-on-start : on
+            // stdout-loglevel : DEBUG
+            // loglevel : ERROR
+            actor {
+                provider = ""Akka.Remote.RemoteActorRefProvider, Akka.Remote""
+                debug : {
+                    receive : on
+                    autoreceive : on
+                    lifecycle : on
+                    event-stream : on
+                    unhandled : on
+                }
+            }
+            remote {
+                helios.tcp {
+                    port = 8777
+                    hostname = localhost
+                }
+            }
+            coordinated-shutdown {
+                phases {    
+                    actor-system-terminate {
+                        timeout = 50 s
+                        depends-on = [before-actor-system-terminate]
+                    }
+                }
+            }
+        }")
 
 
 type JobParams = {
@@ -21,21 +51,17 @@ type JobParams = {
 
 type Message =
     | JobParams of JobParams
-    | Stop
-    | Crash
 
 let main() =
-    use system = ActorSystem.Create("Project1")
+    use system = ActorSystem.Create("Project1", configuration)
     let child (childMailbox: Actor<Message>) = 
         actor {    
             let! msg = childMailbox.Receive()
-            printfn "Child received a message"
             match msg with
             | JobParams(param) ->
-                let response = "Child " + (childMailbox.Self.Path.ToStringWithAddress()) + " received: " + string param.start + " " + string param.stop + " " + string param.step
                 let SumOfConsecutiveSquare n =
                     n * (n+1.0) * (2.0 * n + 1.0) / 6.0
-
+                
                 let IsPerfectSquare n =
                     let flooredSquare = n |> double |> sqrt |> floor |> int
                     n =  flooredSquare * flooredSquare
@@ -46,33 +72,22 @@ let main() =
                         match isPerfectSquare with
                         | true -> printfn "%d" <| int start
                         | false -> printf ""
-                    // childMailbox.Sender().Forward(Stop)
-                    childMailbox.Context.Stop(childMailbox.Self)
                 ConsecutivePerfectSquareCumulativeSum param.start param.stop param.step
-                // printfn "%s" response
-                // childMailbox.Sender() <! response
-            | Crash -> 
-                printfn "Child %A received crash order" (childMailbox.Self.Path)
-                raise (CustomException())
         }
 
     let parent = 
         spawnOpt system "parent"
             <| fun parentMailbox ->
-                // define parent behavior
                 let rec parentLoop() =
                     actor {
                         let! (msg: Message) = parentMailbox.Receive()
-                        printfn "Parent received a message"
                         match msg with
                         | JobParams param ->
-                            printfn "Parent received JobParams"
                             let workUnit = (param.stop - param.start + 1.0) / param.nActors |> int |> float
                             let extraWorkUnit = (param.stop - param.start + 1.0) % param.nActors |> int |> float
                             let mutable tempStart = param.start
                             for i in [1.0 .. param.nActors] do
                                 let childRef = spawn parentMailbox ("child" + string i) child
-                                printfn "%O" childRef
                                 if i<=extraWorkUnit  then
                                     let childParams = JobParams {start=tempStart ; stop=tempStart+workUnit ; step=param.step; nActors=param.nActors}
                                     tempStart <- tempStart + workUnit + 1.0
@@ -84,24 +99,23 @@ let main() =
                         return! parentLoop()
                     }
                 parentLoop()
-            // define supervision strategy
+            
             <| [ SpawnOption.SupervisorStrategy (
-                    // restart on Custom Exception, default behavior on all other exception types
                     Strategy.OneForOne(fun e ->
-                    match e with
-                    | :? CustomException -> Directive.Restart 
+                    match e with 
                     | _ -> SupervisorStrategy.DefaultDecider.Decide(e)))  ]
 
-    async {
-        let param = JobParams {start=1.0 ; stop=40.0 ; step=24.0; nActors=4.0}
-        // let param = JobParams {start=1.0 ; stop=100000000.0 ; step=20.0; nActors=10.0}
-        // let! response = parent <? param
-        // printfn "%s" response
-        parent <! param
-        system.Terminate()
-    } |> Async.RunSynchronously |> ignore
-    // let param = {start=1.0 ; stop=40.0 ; step=24.0; nActors=2.0}
-    // parent <? JobParams param |> ignore
-
+    // async {
+        // let param = JobParams {start=1.0 ; stop=40.0 ; step=24.0; nActors=4.0}
+        // let param = JobParams {start=1.0 ; stop=1000000.0 ; step=24.0; nActors=4.0}
+        // let param = JobParams {start=1.0 ; stop=100000000.0 ; step=2.0; nActors=4.0}
+        // let param = JobParams {start=1.0 ; stop=100000000000.0 ; step=24.0; nActors=10.0}
+        // parent <! param
+        // system.Terminate()
+    // } |> Async.RunSynchronously |> ignore
+    let param = JobParams {start=1.0 ; stop=100000000.0 ; step=2.0; nActors=4.0}
+    // let param = JobParams {start=1.0 ; stop=100000000.0 ; step=20.0; nActors=8.0}
+    parent <! param |> ignore
+    system.Terminate()
 
 main ()
