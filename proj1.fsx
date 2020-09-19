@@ -11,6 +11,8 @@ let configuration =
     ConfigurationFactory.ParseString(
         @"akka {
             coordinated-shutdown {
+                // terminate-actor-system = off
+                // run-by-actor-system-terminate = off
                 phases {    
                     actor-system-terminate {
                         timeout = 50 s
@@ -48,7 +50,7 @@ let main start stop step nActors =
                     n =  flooredSquareRoot * flooredSquareRoot // perfect square if floored square root is equal to n
 
                 let ConsecutivePerfectSquareCumulativeSum start stop step = // works on a sub task
-                    for start in [start .. stop] do
+                    for start in start .. stop do
                         let isPerfectSquare = SumOfConsecutiveSquare(start+step-1.0) - SumOfConsecutiveSquare(start-1.0) |> int |> IsPerfectSquare
                         match isPerfectSquare with
                         | true -> printfn "%d" <| int start
