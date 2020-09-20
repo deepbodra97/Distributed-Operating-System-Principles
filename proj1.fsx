@@ -5,20 +5,15 @@
 open Akka.Actor
 open Akka.Configuration
 open Akka.FSharp
+open System
 
-// actors will be shutdown automatically after 50s to free the resources
+// actor system will not shutdown before actors have completed executing
 let configuration = 
     ConfigurationFactory.ParseString(
         @"akka {
             coordinated-shutdown {
-                // terminate-actor-system = off
-                // run-by-actor-system-terminate = off
-                phases {    
-                    actor-system-terminate {
-                        timeout = 50 s
-                        depends-on = [before-actor-system-terminate]
-                    }
-                }
+                terminate-actor-system = off
+                run-by-actor-system-terminate = off
             }
         }")
 
@@ -41,21 +36,21 @@ let main start stop step nActors =
         actor {    
             let! msg = childMailbox.Receive() // fetch the message from the queue
             match msg with
-            | JobParams(param) -> // if it is a job
+            | JobParams(jobParams) -> // if it is a job
                 let SumOfConsecutiveSquare n = // sum of n consecutive squares = n * (n+1) * (2n+1) / 6
                     n * (n+1.0) * (2.0 * n + 1.0) / 6.0
                 
                 let IsPerfectSquare n = // checks if n is a perfect square or not
-                    let flooredSquareRoot = n |> double |> sqrt |> floor |> int
+                    let flooredSquareRoot = n |> double |> sqrt |> floor
                     n =  flooredSquareRoot * flooredSquareRoot // perfect square if floored square root is equal to n
 
                 let ConsecutivePerfectSquareCumulativeSum start stop step = // works on a sub task
                     for start in start .. stop do
-                        let isPerfectSquare = SumOfConsecutiveSquare(start+step-1.0) - SumOfConsecutiveSquare(start-1.0) |> int |> IsPerfectSquare
+                        let isPerfectSquare = SumOfConsecutiveSquare(start+step-1.0) - SumOfConsecutiveSquare(start-1.0) |> IsPerfectSquare
                         match isPerfectSquare with
-                        | true -> printfn "%d" <| int start
+                        | true -> printfn "%A" <| bigint start
                         | false -> printf ""
-                ConsecutivePerfectSquareCumulativeSum param.start param.stop param.step // perform job
+                ConsecutivePerfectSquareCumulativeSum jobParams.start jobParams.stop jobParams.step // perform job
         }
 
     let parent = // job assignment actor (parent, supervisor)
@@ -65,20 +60,20 @@ let main start stop step nActors =
                     actor {
                         let! (msg: Message) = parentMailbox.Receive() // fetch the message from the queue
                         match msg with
-                        | JobParams param -> // if it is a job
-                            let workUnit = (param.stop - param.start + 1.0) / param.nActors |> int |> float
-                            let extraWorkUnit = (param.stop - param.start + 1.0) % param.nActors |> int |> float // remainder work unit
-                            let mutable tempStart = param.start
-                            for i in [1.0 .. param.nActors] do
+                        | JobParams jobParams -> // if it is a job
+                            let workUnit = (jobParams.stop - jobParams.start + 1.0) / jobParams.nActors |> int |> float
+                            let extraWorkUnit = (jobParams.stop - jobParams.start + 1.0) % jobParams.nActors |> int |> float // remainder work unit
+                            let mutable tempStart = jobParams.start
+                            for i in 1.0 .. jobParams.nActors do
                                 let childRef = spawn parentMailbox ("child" + string i) child
                                 if i<=extraWorkUnit  then
-                                    let childParams = JobParams {start=tempStart ; stop=tempStart+workUnit ; step=param.step; nActors=param.nActors}
+                                    let childParams = JobParams {start=tempStart ; stop=tempStart+workUnit ; step=jobParams.step; nActors=jobParams.nActors}
                                     tempStart <- tempStart + workUnit + 1.0
-                                    childRef.Forward(childParams)
+                                    childRef <! childParams
                                 else
-                                    let childParams = JobParams{start=tempStart ; stop=tempStart+workUnit-1.0 ; step=param.step; nActors=param.nActors}
+                                    let childParams = JobParams{start=tempStart ; stop=tempStart+workUnit-1.0 ; step=jobParams.step; nActors=jobParams.nActors}
                                     tempStart <- tempStart + workUnit
-                                    childRef.Forward(childParams)
+                                    childRef <! childParams
                         return! parentLoop()
                     }
                 parentLoop()
@@ -89,12 +84,12 @@ let main start stop step nActors =
                     match e with 
                     | _ -> SupervisorStrategy.DefaultDecider.Decide(e)))  ]
 
-    let param = JobParams {start=start ; stop=stop ; step=step; nActors=nActors}
-    parent <! param |> ignore
+    let jobParams = JobParams {start=start ; stop=stop ; step=step; nActors=nActors}
+    parent <! jobParams |> ignore
     system.Terminate()
 
 let args : string array = fsi.CommandLineArgs |> Array.tail
 let n = float args.[0]
 let k = float args.[1]
-let nActors = 8.0
+let nActors = 1.0
 main 1.0 n k nActors
