@@ -33,7 +33,13 @@
           "dependencies": {
             "Akka": {
               "target": "Package",
-              "version": "[1.4.10, )"
+              "version": "[1.4.10, )",
+              "generatePathProperty": true
+            },
+            "Akka.Serialization.Hyperion": {
+              "target": "Package",
+              "version": "[1.4.10, )",
+              "generatePathProperty": true
             },
             "FSharp.Core": {
               "target": "Package",

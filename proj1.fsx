@@ -82,7 +82,7 @@ let main start stop step nActors =
             <| [ SpawnOption.SupervisorStrategy (
                     Strategy.OneForOne(fun e ->
                     match e with 
-                    | _ -> SupervisorStrategy.DefaultDecider.Decide(e)))  ]
+                    | _ -> SupervisorStrategy.DefaultDecider.Decide(e)))]
 
     let jobParams = JobParams {start=start ; stop=stop ; step=step; nActors=nActors}
     parent <! jobParams |> ignore

@@ -1,8 +1,8 @@
-﻿// Learn more about F# at http://fsharp.org
-
-open System
+﻿open System
 
 [<EntryPoint>]
 let main argv =
-    printfn "Hello World from F#!"
-    0 // return an integer exit code
+    let n = float argv.[0]
+    let k = float argv.[1]
+    a.main 1.0 n k 2.0
+    0
