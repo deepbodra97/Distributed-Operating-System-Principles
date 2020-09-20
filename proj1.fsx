@@ -41,7 +41,7 @@ let main start stop step nActors =
                     n * (n+1.0) * (2.0 * n + 1.0) / 6.0
                 
                 let IsPerfectSquare n = // checks if n is a perfect square or not
-                    let flooredSquareRoot = n |> double |> sqrt |> floor
+                    let flooredSquareRoot = n |> float |> sqrt |> floor
                     n =  flooredSquareRoot * flooredSquareRoot // perfect square if floored square root is equal to n
 
                 let ConsecutivePerfectSquareCumulativeSum start stop step = // works on a sub task
@@ -91,5 +91,5 @@ let main start stop step nActors =
 let args : string array = fsi.CommandLineArgs |> Array.tail
 let n = float args.[0]
 let k = float args.[1]
-let nActors = 1.0
+let nActors = 8.0
 main 1.0 n k nActors
