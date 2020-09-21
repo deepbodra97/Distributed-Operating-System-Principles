@@ -42,16 +42,16 @@ let main start stop step nActors =
             let! msg = childMailbox.Receive() // fetch the message from the queue
             match msg with
             | JobParams(jobParams) -> // if it is a job
-                let SumOfConsecutiveSquare (n: Extreme.Mathematics.BigInteger) =
-                    n * (n+ Extreme.Mathematics.BigInteger 1.0) * (Extreme.Mathematics.BigInteger 2.0 * n + Extreme.Mathematics.BigInteger 1.0) / Extreme.Mathematics.BigInteger 6.0
+                let SumOfConsecutiveSquare (n: Mathematics.BigInteger) =
+                    n * (n+ Mathematics.BigInteger 1.0) * (Mathematics.BigInteger 2.0 * n + Mathematics.BigInteger 1.0) / Mathematics.BigInteger 6.0
                 
-                let IsPerfectSquare (n: Extreme.Mathematics.BigInteger) = // checks if n is a perfect square or not
+                let IsPerfectSquare (n: Mathematics.BigInteger) = // checks if n is a perfect square or not
                     let squareRoot = n |> sqrt
                     n =  squareRoot * squareRoot
 
                 let ConsecutivePerfectSquareCumulativeSum start stop step = // works on a sub task
                     for start in start .. stop do
-                        let isPerfectSquare = SumOfConsecutiveSquare(Extreme.Mathematics.BigInteger (start+step-1.0)) - SumOfConsecutiveSquare(Extreme.Mathematics.BigInteger (start-1.0)) |> IsPerfectSquare
+                        let isPerfectSquare = SumOfConsecutiveSquare(Mathematics.BigInteger (start+step-1.0)) - SumOfConsecutiveSquare(Mathematics.BigInteger (start-1.0)) |> IsPerfectSquare
                         match isPerfectSquare with
                         | true -> printfn "%A" <| bigint start
                         | false -> printf ""
