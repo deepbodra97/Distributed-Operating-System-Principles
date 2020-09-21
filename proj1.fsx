@@ -2,8 +2,7 @@
 
 #r "nuget: Extreme.Numerics.FSharp"
 
-#r "nuget: Akka.FSharp" 
-#r "nuget: Akka.Remote"
+#r "nuget: Akka.FSharp"
 
 open Extreme
 
