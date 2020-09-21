@@ -17,6 +17,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\Deepb\.nuget\packages\fsharp.core\4.7.2</PkgFSharp_Core>
+    <PkgExtreme_Numerics Condition=" '$(PkgExtreme_Numerics)' == '' ">C:\Users\Deepb\.nuget\packages\extreme.numerics\7.0.0</PkgExtreme_Numerics>
     <PkgAkka Condition=" '$(PkgAkka)' == '' ">C:\Users\Deepb\.nuget\packages\akka\1.4.10</PkgAkka>
     <PkgAkka_Serialization_Hyperion Condition=" '$(PkgAkka_Serialization_Hyperion)' == '' ">C:\Users\Deepb\.nuget\packages\akka.serialization.hyperion\1.4.10</PkgAkka_Serialization_Hyperion>
   </PropertyGroup>

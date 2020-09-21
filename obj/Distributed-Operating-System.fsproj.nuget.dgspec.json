@@ -41,6 +41,10 @@
               "version": "[1.4.10, )",
               "generatePathProperty": true
             },
+            "Extreme.Numerics.FSharp": {
+              "target": "Package",
+              "version": "[7.0.0, )"
+            },
             "FSharp.Core": {
               "target": "Package",
               "version": "[4.7.2, )",

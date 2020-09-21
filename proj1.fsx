@@ -1,6 +1,11 @@
 #time "on"
+
+#r "nuget: Extreme.Numerics.FSharp"
+
 #r "nuget: Akka.FSharp" 
 #r "nuget: Akka.Remote"
+
+open Extreme
 
 open Akka.Actor
 open Akka.Configuration
@@ -37,16 +42,16 @@ let main start stop step nActors =
             let! msg = childMailbox.Receive() // fetch the message from the queue
             match msg with
             | JobParams(jobParams) -> // if it is a job
-                let SumOfConsecutiveSquare n = // sum of n consecutive squares = n * (n+1) * (2n+1) / 6
-                    n * (n+1.0) * (2.0 * n + 1.0) / 6.0
+                let SumOfConsecutiveSquare (n: Extreme.Mathematics.BigInteger) =
+                    n * (n+ Extreme.Mathematics.BigInteger 1.0) * (Extreme.Mathematics.BigInteger 2.0 * n + Extreme.Mathematics.BigInteger 1.0) / Extreme.Mathematics.BigInteger 6.0
                 
-                let IsPerfectSquare n = // checks if n is a perfect square or not
-                    let flooredSquareRoot = n |> float |> sqrt |> floor
-                    n =  flooredSquareRoot * flooredSquareRoot // perfect square if floored square root is equal to n
+                let IsPerfectSquare (n: Extreme.Mathematics.BigInteger) = // checks if n is a perfect square or not
+                    let squareRoot = n |> sqrt
+                    n =  squareRoot * squareRoot
 
                 let ConsecutivePerfectSquareCumulativeSum start stop step = // works on a sub task
                     for start in start .. stop do
-                        let isPerfectSquare = SumOfConsecutiveSquare(start+step-1.0) - SumOfConsecutiveSquare(start-1.0) |> IsPerfectSquare
+                        let isPerfectSquare = SumOfConsecutiveSquare(Extreme.Mathematics.BigInteger (start+step-1.0)) - SumOfConsecutiveSquare(Extreme.Mathematics.BigInteger (start-1.0)) |> IsPerfectSquare
                         match isPerfectSquare with
                         | true -> printfn "%A" <| bigint start
                         | false -> printf ""

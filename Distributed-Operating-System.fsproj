@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="Akka" Version="1.4.10" />
     <PackageReference Include="Akka.Serialization.Hyperion" Version="1.4.10" />
+    <PackageReference Include="Extreme.Numerics.FSharp" Version="7.0.0" />
   </ItemGroup>
 
 </Project>
