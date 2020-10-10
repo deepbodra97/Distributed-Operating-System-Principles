@@ -17,6 +17,7 @@ open System
 
 type Message =
     | Rumor of string
+    | TickRumor of string
     | Done of string
 
 // main program
@@ -27,18 +28,23 @@ let main numNodes =
             let rnd = System.Random()
             neighbors.[rnd.Next(neighbors.Length)]
 
+        let mutable gossipCount = 0
+
         let rec childLoop() =
             actor {   
                 let! msg = childMailbox.Receive() // fetch the message from the queue
                 let sender = childMailbox.Sender()
-                printfn "Sender: %O" sender
                 match msg with
                 | Rumor rumor -> // if it is a job
-                    // printfn "Child received rumor %O %s" <| childMailbox.Self.Path.ToStringWithAddress() <| rumor
+                    if gossipCount = 0 then
+                        system.Scheduler.ScheduleTellRepeatedly(TimeSpan.Zero, (TimeSpan.FromMilliseconds(100.0)), childMailbox.Self, (TickRumor(rumor)))
+
+                    gossipCount <- gossipCount + 1
+                    if gossipCount = 10 then
+                        system.ActorSelection("/user/parent") <! Done "done"
+                | TickRumor rumor ->
                     let randomNeighborName = "child" +  string(getRandomNeighbor([|1 .. numNodes|]))
-                    let randomNeighbor = system.ActorSelection("/user/parent/"+randomNeighborName)
-                    randomNeighbor <! Rumor rumor
-                    system.ActorSelection("/user/parent") <! Done "done"
+                    system.ActorSelection("/user/parent/"+randomNeighborName) <! Rumor rumor
                 | _ -> printfn "Invalid message"
                 return! childLoop()
             }
@@ -54,8 +60,8 @@ let main numNodes =
                         | Rumor rumor -> // if it is a job
                             printfn "Parent received rumor %s" rumor
                             for i in 1 .. numNodes do
-                                let childRef = spawn parentMailbox ("child" + string i) child
-                                childRef <! Rumor rumor
+                                spawn parentMailbox ("child" + string i) child |> ignore
+                            system.ActorSelection("/user/parent/child1") <! Rumor rumor
                         | Done done_msg ->
                             printfn "Parent received done %s" done_msg
                         return! parentLoop()
