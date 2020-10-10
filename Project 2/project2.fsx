@@ -12,15 +12,15 @@ open Akka.FSharp
 open System
 
 // actor system will not shutdown before actors have completed executing
-let configuration = 
-    ConfigurationFactory.ParseString(
-        @"akka {
-            coordinated-shutdown {
-                terminate-actor-system = off
-                run-by-actor-system-terminate = off
-            }
-        }"
-    )
+// let configuration = 
+//     ConfigurationFactory.ParseString(
+//         @"akka {
+//             coordinated-shutdown {
+//                 terminate-actor-system = off
+//                 run-by-actor-system-terminate = off
+//             }
+//         }"
+//     )
 
 // Job is assigned by sending this message
 
@@ -32,8 +32,8 @@ type Message =
 
 // main program
 let main numNodes =
-    use system = ActorSystem.Create("Project2", configuration) // create an actor systems
-    let child (childMailbox: Actor<_>) = // worker actor (child)
+    use system = ActorSystem.Create("Project2") // create an actor systems
+    let child (childMailbox: Actor<Message>) =
         let getRandomNeighbor (neighbors: _[]) =  
             let rnd = System.Random()
             neighbors.[rnd.Next(neighbors.Length)]
@@ -42,45 +42,25 @@ let main numNodes =
             actor {   
                 let! msg = childMailbox.Receive() // fetch the message from the queue
                 let sender = childMailbox.Sender()
-                printfn "Sender: %O" sender
                 match msg with
                 | Rumor rumor -> // if it is a job
-                    // printfn "Child received rumor %O %s" <| childMailbox.Self.Path.ToStringWithAddress() <| rumor
-                    let randomNeighborName = "child" +  string(getRandomNeighbor([|1 .. numNodes|]))
-                    let randomNeighbor = system.ActorSelection("akka://Project2/user/parent/"+randomNeighborName)
+                    printfn "Child received rumor %O %s" <| childMailbox.Self.Path.ToStringWithAddress() <| rumor
+                    let randomNeighborName = string(getRandomNeighbor([|1 .. numNodes|]))
+                    // printfn "Random neighbor: %s" randomNeighborName
+                    let randomNeighbor = system.ActorSelection("akka://Project2/user/"+randomNeighborName)
                     randomNeighbor <! Rumor rumor
                 | _ -> printfn "Invalid message"
                 return! childLoop()
             }
         childLoop()
 
-    let parent = // job assignment actor (parent, supervisor)
-        spawnOpt system "parent"
-            <| fun parentMailbox ->
-                let rec parentLoop() =
-                    actor {
-                        let! (msg: Message) = parentMailbox.Receive() // fetch the message from the queue
-                        match msg with
-                        | Rumor rumor -> // if it is a job
-                            printfn "Parent received rumor %s" rumor
-                            for i in 1 .. numNodes do
-                                let childRef = spawn parentMailbox ("child" + string i) child
-                                childRef <! Rumor rumor
-                        | Done done_msg ->
-                            printfn "Parent received done %s" done_msg
-                        return! parentLoop()
-                    }
-                parentLoop()
-            
-            // default supervisor strategy
-            <| [ SpawnOption.SupervisorStrategy (
-                    Strategy.OneForOne(fun e ->
-                    match e with 
-                    | _ -> SupervisorStrategy.DefaultDecider.Decide(e)))]
-
     let rumor = Rumor "I Love Distrubuted Systems"
-    parent <! rumor
-    system.Terminate()
+    for i in 1 .. numNodes do
+        let ref = spawn system (string i) child
+        printfn "created %O" ref
+    system.ActorSelection("akka://Project2/user/1") <! rumor
+    System.Console.ReadLine()
+    // system.Terminate()
 
 // let args : string array = fsi.CommandLineArgs |> Array.tail
 // let n = float args.[0]
