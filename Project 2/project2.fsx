@@ -26,7 +26,7 @@ let main numNodes topology algorithm =
     let child (childMailbox: Actor<_>) = // worker actor (child)
         let getRandomInt start stop =  
             let rnd = System.Random()
-            rnd.Next(start, stop)
+            rnd.Next(start, stop+1)
 
         let mutable gossipCount = 0
 
