@@ -21,14 +21,27 @@ type Message =
     | Done of string
 
 // main program
-let main numNodes topology algorithm =
+let main n topology algorithm =
     use system = ActorSystem.Create("Project2") // create an actor systems
-    let child (childMailbox: Actor<_>) = // worker actor (child)
-        let getRandomInt start stop =  
+
+    let getRandomInt start stop =  
             let rnd = System.Random()
             rnd.Next(start, stop+1)
+    let dim =  float n |> sqrt |> floor |> int
+
+    let numNodes =
+        match topology with
+        | "2D" | "imp2D" -> dim * dim
+        | _ -> n
+
+    let child (childMailbox: Actor<_>) = // worker actor (child)
 
         let mutable gossipCount = 0
+        let randomNeighbor = getRandomInt 1 numNodes+1
+
+        // For 2D and imp2D
+        let getLeftNeighbor id = if id % dim = 1 then -1 else (id-1)
+        let getRightNeighbor id = if id % dim = 0 then -1 else (id+1)
 
         let rec childLoop() =
             actor {   
@@ -43,8 +56,26 @@ let main numNodes topology algorithm =
                     if gossipCount = 10 then
                         system.ActorSelection("/user/parent") <! Done "done"
                 | TickRumor rumor ->
-                    let randomNeighborName = "child" +  string(getRandomInt 1 numNodes)
-                    system.ActorSelection("/user/parent/"+randomNeighborName) <! Rumor rumor
+                    let id = childMailbox.Self.Path.Name |> int
+                    match topology with
+                    | "line" ->
+                        let neighbors = [| id-1; id+1 |]
+                                        |> Array.filter (fun x -> x>=1 && x<=numNodes)
+                        let randomNeighborName = string(neighbors.[getRandomInt 1 neighbors.Length-1])
+                        system.ActorSelection("/user/parent/"+randomNeighborName) <! Rumor rumor
+                    | "2D" ->
+                        let neighbors = [|id-dim; getLeftNeighbor id; getRightNeighbor id; id+dim|]
+                                        |> Array.filter (fun x -> x>=1 && x<=numNodes)
+                        let randomNeighborName = string(neighbors.[getRandomInt 1 neighbors.Length-1])
+                        system.ActorSelection("/user/parent/"+randomNeighborName) <! Rumor rumor
+                    | "imp2D" ->
+                        let neighbors = [|id-dim; getLeftNeighbor id; getRightNeighbor id; id+dim; randomNeighbor|]
+                                        |> Array.filter (fun x -> x>=1 && x<=numNodes)
+                        let randomNeighborName = string(neighbors.[getRandomInt 1 neighbors.Length-1])
+                        system.ActorSelection("/user/parent/"+randomNeighborName) <! Rumor rumor
+                    | "full" ->
+                        let randomNeighborName = string(getRandomInt 1 numNodes)
+                        system.ActorSelection("/user/parent/"+randomNeighborName) <! Rumor rumor 
                 | _ -> printfn "Invalid message"
                 return! childLoop()
             }
@@ -62,8 +93,8 @@ let main numNodes topology algorithm =
                         | Rumor rumor -> // if it is a job
                             printfn "Parent received rumor %s" rumor
                             for i in 1 .. numNodes do
-                                spawn parentMailbox ("child" + string i) child |> ignore
-                            system.ActorSelection("/user/parent/child1") <! Rumor rumor
+                                spawn parentMailbox (string i) child |> ignore
+                            system.ActorSelection("/user/parent/1") <! Rumor rumor
                         | Done done_msg ->
                             printfn "Parent received done %O" sender
                         
@@ -88,4 +119,7 @@ let main numNodes topology algorithm =
 // let n = float args.[0]
 // let k = float args.[1]
 // let nActors = 8.0
-main 5 "full" "gossip"
+// main 1000 "line" "gossip"
+// main 1000 "2D" "gossip"
+main 5 "imp2D" "gossip"
+// main 1000 "full" "gossip"
