@@ -119,8 +119,10 @@ let main n topology algorithm =
                             printfn "Parent received push sum %f %f" s w
                             for i in 1 .. numNodes do
                                 let childRef = spawn parentMailbox (string i) child
-                                childRef <! ValueWeightInit (float i, 1.0)
-                            system.ActorSelection("/user/parent/"+ string 1) <! PushSum(s, w)
+                                childRef <! ValueWeightInit (float i, 0.0)
+                            let startRef = system.ActorSelection("/user/parent/"+ string 1)
+                            startRef <! ValueWeightInit (float 1, 1.0)
+                            startRef <! PushSum(s, w)
                         | Done done_msg ->
                             printfn "Parent received done %O" sender
                         return! parentLoop()
@@ -135,9 +137,9 @@ let main n topology algorithm =
 
 
     async {
-        // let rumor = Rumor "I Love Distrubuted Systems"
-        // let! response = parent <? rumor
-        // printfn "%s" response
+        let rumor = Rumor "I Love Distrubuted Systems"
+        let! response = parent <? rumor
+        printfn "%s" response
 
         let pushsum = PushSum(0.0, 0.0)
         let! response = parent <? pushsum
@@ -153,4 +155,5 @@ let main n topology algorithm =
 // main 5 "imp2D" "gossip"
 // main 1000 "full" "gossip"
 
-main 5 "full" "pushsum"
+main 5 "line" "pushsum"
+// main 5 "full" "pushsum"
