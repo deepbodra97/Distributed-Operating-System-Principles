@@ -96,7 +96,7 @@ let main n topology algorithm =
                             printfn "Parent received rumor %s" rumor
                             for i in 1 .. numNodes do
                                 spawn parentMailbox (string i) child |> ignore
-                            system.ActorSelection("/user/parent/1") <! Rumor rumor
+                            system.ActorSelection("/user/parent/"+ string(getRandomInt 1 numNodes)) <! Rumor rumor
                         | Done done_msg ->
                             printfn "Parent received done %O" sender
                         
