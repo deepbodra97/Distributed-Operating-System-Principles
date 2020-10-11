@@ -21,12 +21,12 @@ type Message =
     | Done of string
 
 // main program
-let main numNodes =
+let main numNodes topology algorithm =
     use system = ActorSystem.Create("Project2") // create an actor systems
     let child (childMailbox: Actor<_>) = // worker actor (child)
-        let getRandomNeighbor (neighbors: _[]) =  
+        let getRandomInt start stop =  
             let rnd = System.Random()
-            neighbors.[rnd.Next(neighbors.Length)]
+            rnd.Next(start, stop)
 
         let mutable gossipCount = 0
 
@@ -43,7 +43,7 @@ let main numNodes =
                     if gossipCount = 10 then
                         system.ActorSelection("/user/parent") <! Done "done"
                 | TickRumor rumor ->
-                    let randomNeighborName = "child" +  string(getRandomNeighbor([|1 .. numNodes|]))
+                    let randomNeighborName = "child" +  string(getRandomInt 1 numNodes)
                     system.ActorSelection("/user/parent/"+randomNeighborName) <! Rumor rumor
                 | _ -> printfn "Invalid message"
                 return! childLoop()
@@ -53,9 +53,11 @@ let main numNodes =
     let parent = // job assignment actor (parent, supervisor)
         spawnOpt system "parent"
             <| fun parentMailbox ->
+                let mutable gossipCount = 0
                 let rec parentLoop() =
                     actor {
                         let! (msg: Message) = parentMailbox.Receive() // fetch the message from the queue
+                        let sender = parentMailbox.Sender()
                         match msg with
                         | Rumor rumor -> // if it is a job
                             printfn "Parent received rumor %s" rumor
@@ -63,7 +65,8 @@ let main numNodes =
                                 spawn parentMailbox ("child" + string i) child |> ignore
                             system.ActorSelection("/user/parent/child1") <! Rumor rumor
                         | Done done_msg ->
-                            printfn "Parent received done %s" done_msg
+                            printfn "Parent received done %O" sender
+                        
                         return! parentLoop()
                     }
                 parentLoop()
@@ -85,4 +88,4 @@ let main numNodes =
 // let n = float args.[0]
 // let k = float args.[1]
 // let nActors = 8.0
-main 10
+main 5 "full" "gossip"
