@@ -35,13 +35,34 @@ let main n topology algorithm =
         | _ -> n
 
     let child (childMailbox: Actor<_>) = // worker actor (child)
-
+        let id = childMailbox.Self.Path.Name |> int
         let mutable gossipCount = 0
         let randomNeighbor = getRandomInt 1 numNodes+1
 
         // For 2D and imp2D
-        let getLeftNeighbor id = if id % dim = 1 then -1 else (id-1)
-        let getRightNeighbor id = if id % dim = 0 then -1 else (id+1)
+        let getLeftNeighbor = if id % dim = 1 then -1 else (id-1)
+        let getRightNeighbor = if id % dim = 0 then -1 else (id+1)
+
+        let chooseNeighbor () =
+            match topology with
+            | "line" ->
+                let neighbors = [| id-1; id+1 |]
+                                |> Array.filter (fun x -> x>=1 && x<=numNodes)
+                let randomNeighborName = string(neighbors.[getRandomInt 1 neighbors.Length-1])
+                randomNeighborName
+            | "2D" ->
+                let neighbors = [|id-dim; getLeftNeighbor; getRightNeighbor; id+dim|]
+                                |> Array.filter (fun x -> x>=1 && x<=numNodes)
+                let randomNeighborName = string(neighbors.[getRandomInt 1 neighbors.Length-1])
+                randomNeighborName
+            | "imp2D" ->
+                let neighbors = [|id-dim; getLeftNeighbor; getRightNeighbor; id+dim; randomNeighbor|]
+                                |> Array.filter (fun x -> x>=1 && x<=numNodes)
+                let randomNeighborName = string(neighbors.[getRandomInt 1 neighbors.Length-1])
+                randomNeighborName
+            | "full" ->
+                let randomNeighborName = string(getRandomInt 1 numNodes)
+                randomNeighborName
 
         let rec childLoop() =
             actor {   
@@ -50,32 +71,13 @@ let main n topology algorithm =
                 match msg with
                 | Rumor rumor -> // if it is a job
                     if gossipCount = 0 then
-                        system.Scheduler.ScheduleTellRepeatedly(TimeSpan.Zero, (TimeSpan.FromMilliseconds(100.0)), childMailbox.Self, (TickRumor(rumor)))
+                        system.Scheduler.ScheduleTellRepeatedly(TimeSpan.Zero, (TimeSpan.FromMilliseconds(1.0)), childMailbox.Self, (TickRumor(rumor)))
 
                     gossipCount <- gossipCount + 1
                     if gossipCount = 10 then
                         system.ActorSelection("/user/parent") <! Done "done"
                 | TickRumor rumor ->
-                    let id = childMailbox.Self.Path.Name |> int
-                    match topology with
-                    | "line" ->
-                        let neighbors = [| id-1; id+1 |]
-                                        |> Array.filter (fun x -> x>=1 && x<=numNodes)
-                        let randomNeighborName = string(neighbors.[getRandomInt 1 neighbors.Length-1])
-                        system.ActorSelection("/user/parent/"+randomNeighborName) <! Rumor rumor
-                    | "2D" ->
-                        let neighbors = [|id-dim; getLeftNeighbor id; getRightNeighbor id; id+dim|]
-                                        |> Array.filter (fun x -> x>=1 && x<=numNodes)
-                        let randomNeighborName = string(neighbors.[getRandomInt 1 neighbors.Length-1])
-                        system.ActorSelection("/user/parent/"+randomNeighborName) <! Rumor rumor
-                    | "imp2D" ->
-                        let neighbors = [|id-dim; getLeftNeighbor id; getRightNeighbor id; id+dim; randomNeighbor|]
-                                        |> Array.filter (fun x -> x>=1 && x<=numNodes)
-                        let randomNeighborName = string(neighbors.[getRandomInt 1 neighbors.Length-1])
-                        system.ActorSelection("/user/parent/"+randomNeighborName) <! Rumor rumor
-                    | "full" ->
-                        let randomNeighborName = string(getRandomInt 1 numNodes)
-                        system.ActorSelection("/user/parent/"+randomNeighborName) <! Rumor rumor 
+                    system.ActorSelection("/user/parent/"+chooseNeighbor ()) <! Rumor rumor
                 | _ -> printfn "Invalid message"
                 return! childLoop()
             }
@@ -119,7 +121,7 @@ let main n topology algorithm =
 // let n = float args.[0]
 // let k = float args.[1]
 // let nActors = 8.0
-// main 1000 "line" "gossip"
+main 10 "line" "gossip"
 // main 1000 "2D" "gossip"
-main 5 "imp2D" "gossip"
+// main 5 "imp2D" "gossip"
 // main 1000 "full" "gossip"
