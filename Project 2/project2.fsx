@@ -1,10 +1,6 @@
 #time "on"
 
-#r "nuget: Extreme.Numerics.FSharp"
-
 #r "nuget: Akka.FSharp"
-
-open Extreme
 
 open Akka.Actor
 open Akka.Configuration
@@ -88,7 +84,10 @@ let main n topology algorithm =
                     weight <- w
                 | PushSum (newValue, newWeight) ->
                     if messageCount = 0 then
-                        system.Scheduler.ScheduleTellRepeatedly(TimeSpan.Zero, (TimeSpan.FromMilliseconds(250.0)), childMailbox.Self, (TickPushSum "tick"))
+                        system.Scheduler.ScheduleTellRepeatedly(TimeSpan.Zero, (TimeSpan.FromMilliseconds(1.0)), childMailbox.Self, (TickPushSum "tick"))
+                    messageCount <- messageCount + 1
+                    // if messageCount = 10 then
+                        // system.ActorSelection("/user/parent") <! Done "done"
                     value <- value + newValue
                     weight <- weight + newWeight
                 | TickPushSum tick ->
@@ -120,11 +119,15 @@ let main n topology algorithm =
                             for i in 1 .. numNodes do
                                 let childRef = spawn parentMailbox (string i) child
                                 childRef <! ValueWeightInit (float i, 0.0)
-                            let startRef = system.ActorSelection("/user/parent/"+ string 1)
+                            let startRef = system.ActorSelection("/user/parent/"+ string(getRandomInt 1 1))
                             startRef <! ValueWeightInit (float 1, 1.0)
                             startRef <! PushSum(s, w)
                         | Done done_msg ->
                             printfn "Parent received done %O" sender
+                            messageCount <- messageCount + 1
+                            // if messageCount = numNodes then
+                                // system.ActorSelection("/user/parent") <! PoisonPill.Instance
+                                // parentMailbox.Context.Stop(parentMailbox.Self)
                         return! parentLoop()
                     }
                 parentLoop()
@@ -137,13 +140,15 @@ let main n topology algorithm =
 
 
     async {
-        let rumor = Rumor "I Love Distrubuted Systems"
-        let! response = parent <? rumor
-        printfn "%s" response
-
-        let pushsum = PushSum(0.0, 0.0)
-        let! response = parent <? pushsum
-        printfn "%s" response    
+        match algorithm  with
+        | "gossip" ->    
+            let rumor = Rumor "I Love Distrubuted Systems"
+            let! response = parent <? rumor
+            printfn "%s" response
+        | "pushsum" ->
+            let pushsum = PushSum(0.0, 0.0)
+            let! response = parent <? pushsum
+            printfn "%s" response    
     } |> Async.RunSynchronously
 
 // let args : string array = fsi.CommandLineArgs |> Array.tail
@@ -155,5 +160,7 @@ let main n topology algorithm =
 // main 5 "imp2D" "gossip"
 // main 1000 "full" "gossip"
 
-main 5 "line" "pushsum"
-// main 5 "full" "pushsum"
+// main 100 "line" "pushsum"
+// main 1000 "2D" "pushsum"
+// main 5 "imp2D" "pushsum"
+main 55 "full" "pushsum"
