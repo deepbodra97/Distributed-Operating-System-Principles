@@ -1,7 +1,7 @@
 #r "nuget: Akka.FSharp"
 
 open Akka.Actor
-open Akka.Configuration
+// open Akka.Configuration
 open Akka.FSharp
 open System
 open System.Diagnostics
@@ -130,6 +130,7 @@ let main n topology algorithm =
                         match msg with
                         | Rumor rumor -> // if it is a job
                             printfn "Parent received rumor %s" rumor
+                            mainSender <- sender
                             for i in 1 .. numNodes do
                                 spawn parentMailbox (string i) child |> ignore
                             system.ActorSelection("/user/parent/"+ string(getRandomInt 1 numNodes)) <! Rumor rumor
@@ -185,7 +186,7 @@ let main n topology algorithm =
 // main 5 "line" "gossip"
 // main 1000 "2D" "gossip"
 // main 5 "imp2D" "gossip"
-// main 1000 "full" "gossip"
+main 1000 "full" "gossip"
 
 // main 5 "line" "pushsum" // 15=15
 // main 20 "line" "pushsum" // 210
@@ -204,6 +205,6 @@ let main n topology algorithm =
 
 // full works
 // main 5 "full" "pushsum" // 15
-main 100 "full" "pushsum" // 5050
+// main 100 "full" "pushsum" // 5050
 // main 1000 "full" "pushsum" // 500500
 // main 10000 "full" "pushsum" // 50005000
