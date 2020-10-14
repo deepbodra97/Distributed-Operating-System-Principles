@@ -1,23 +1,21 @@
-#time "on"
-
 #r "nuget: Akka.FSharp"
 
 open Akka.Actor
 open Akka.Configuration
 open Akka.FSharp
 open System
+open System.Diagnostics
 
 // Job is assigned by sending this message
 
 // different message types
-
 type Message =
     | Rumor of string
     | TickRumor of string
     | ValueWeightInit of float * float
     | PushSum of float * float
     | TickPushSum of string
-    | Done of string
+    | Done of float
 
 // main program
 let main n topology algorithm =
@@ -36,11 +34,13 @@ let main n topology algorithm =
     let child (childMailbox: Actor<_>) = // worker actor (child)
         let id = childMailbox.Self.Path.Name |> int
         let mutable messageCount = 0
-        let randomNeighbor = getRandomInt 1 numNodes+1
+        let randomNeighbor = getRandomInt 1 numNodes
 
+        let mutable cancelable = Unchecked.defaultof<ICancelable>
         let mutable value = 0.0
         let mutable weight = 0.0
         let mutable consecutive = 0
+        let mutable hasConverged = false
 
         // For 2D and imp2D
         let getLeftNeighbor = if id % dim = 1 then -1 else (id-1)
@@ -51,17 +51,17 @@ let main n topology algorithm =
             | "line" ->
                 let neighbors = [| id-1; id+1 |]
                                 |> Array.filter (fun x -> x>=1 && x<=numNodes)
-                let randomNeighborName = string(neighbors.[getRandomInt 1 neighbors.Length-1])
+                let randomNeighborName = string(neighbors.[getRandomInt 0 (neighbors.Length-1)])
                 randomNeighborName
             | "2D" ->
                 let neighbors = [|id-dim; getLeftNeighbor; getRightNeighbor; id+dim|]
                                 |> Array.filter (fun x -> x>=1 && x<=numNodes)
-                let randomNeighborName = string(neighbors.[getRandomInt 1 neighbors.Length-1])
+                let randomNeighborName = string(neighbors.[getRandomInt 0 (neighbors.Length-1)])
                 randomNeighborName
             | "imp2D" ->
                 let neighbors = [|id-dim; getLeftNeighbor; getRightNeighbor; id+dim; randomNeighbor|]
                                 |> Array.filter (fun x -> x>=1 && x<=numNodes)
-                let randomNeighborName = string(neighbors.[getRandomInt 1 neighbors.Length-1])
+                let randomNeighborName = string(neighbors.[getRandomInt 0 (neighbors.Length-1)])
                 randomNeighborName
             | "full" ->
                 let randomNeighborName = string(getRandomInt 1 numNodes)
@@ -74,31 +74,39 @@ let main n topology algorithm =
                 match msg with
                 | Rumor rumor -> // if it is a job
                     if messageCount = 0 then
-                        system.Scheduler.ScheduleTellRepeatedly(TimeSpan.Zero, (TimeSpan.FromMilliseconds(1.0)), childMailbox.Self, (TickRumor(rumor)))
+                        cancelable <- system.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.Zero, (TimeSpan.FromMilliseconds(1.0)), childMailbox.Self, (TickRumor(rumor)), childMailbox.Self)
                     messageCount <- messageCount + 1
                     if messageCount = 10 then
-                        system.ActorSelection("/user/parent") <! Done "done"
+                        system.ActorSelection("/user/parent") <! Done 1.0
                 | TickRumor rumor ->
                     system.ActorSelection("/user/parent/"+chooseNeighbor ()) <! Rumor rumor
                 | ValueWeightInit (v, w) ->
                     value <- v
                     weight <- w
                 | PushSum (newValue, newWeight) ->
-                    if messageCount = 0 then
-                        system.Scheduler.ScheduleTellRepeatedly(TimeSpan.Zero, (TimeSpan.FromMilliseconds(1.0)), childMailbox.Self, (TickPushSum "tick"))
-                    messageCount <- messageCount + 1
-                    // if messageCount = 10 then
-                    //     system.ActorSelection("/user/parent") <! Done "done"
-                    if abs (value/weight - (value+newValue)/(weight+newWeight)) < 10.0**(-10.0) then
-                        consecutive <- consecutive + 1
-                        if consecutive = 5 then
-                            printfn "Converged: %f" (value/weight)
-                            system.ActorSelection("/user/parent") <! Done "done"
-                    else
-                        consecutive <- 0
+                    if not hasConverged then    
+                        if messageCount = 0 then
+                            cancelable <- system.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.Zero, (TimeSpan.FromMilliseconds(0.1)), childMailbox.Self, (TickPushSum "tick"), childMailbox.Self)
+                        messageCount <- messageCount + 1
+                        if abs (value/weight - (value+newValue)/(weight+newWeight)) < 10.0**(-10.0) then
+                            consecutive <- consecutive + 1
+                            if consecutive = 5 then
+                                // printfn "Converged: %f" (value/weight)
+                                // cancelable.Cancel ()
+                                hasConverged <- true
+                                system.ActorSelection("/user/parent") <! Done (value/weight)
+                        else
+                            consecutive <- 0
 
-                    value <- value + newValue
-                    weight <- weight + newWeight
+                        value <- value + newValue
+                        weight <- weight + newWeight
+                    // else
+                        // value <- value + newValue
+                        // weight <- weight + newWeight
+                        // value <- value / 2.0
+                        // weight <- weight / 2.0
+                        // system.ActorSelection("/user/parent/"+chooseNeighbor ()) <! PushSum(newValue, newWeight)
+
                 | TickPushSum tick ->
                     value <- value / 2.0
                     weight <- weight / 2.0
@@ -107,11 +115,13 @@ let main n topology algorithm =
                 | _ -> printfn "Invalid message"
                 return! childLoop()
             }
+
         childLoop()
 
     let parent = // job assignment actor (parent, supervisor)
         spawnOpt system "parent"
             <| fun parentMailbox ->
+                let mutable mainSender = Unchecked.defaultof<IActorRef>
                 let mutable messageCount = 0
                 let rec parentLoop() =
                     actor {
@@ -125,6 +135,7 @@ let main n topology algorithm =
                             system.ActorSelection("/user/parent/"+ string(getRandomInt 1 numNodes)) <! Rumor rumor
                         | PushSum (s, w) ->
                             printfn "Parent received push sum %f %f" s w
+                            mainSender <- sender
                             for i in 1 .. numNodes do
                                 let childRef = spawn parentMailbox (string i) child
                                 childRef <! ValueWeightInit (float i, 0.0)
@@ -133,14 +144,12 @@ let main n topology algorithm =
                             startRef <! ValueWeightInit (float startId, 1.0)
                             startRef <! PushSum(s, w)
                         | Done done_msg ->
-                            printfn "Parent received done %O" sender
+                            printfn "Node %s converged to %f" sender.Path.Name done_msg
                             messageCount <- messageCount + 1
                             if messageCount = numNodes then
-                                printfn "----------------------------------------------------"
-                                // system.ActorSelection("/user/parent") <! PoisonPill.Instance
-                                // parentMailbox.Context.Stop(parentMailbox.Self)
-                                system.Terminate()
-                                // mainSender <! "Done"
+                                system.Terminate() |> ignore
+                                mainSender <! "Done"
+                        | _ -> return ()
                         return! parentLoop()
                     }
                 parentLoop()
@@ -153,15 +162,20 @@ let main n topology algorithm =
 
 
     async {
+        let timer = new Stopwatch()
+        timer.Start()
         match algorithm  with
-        | "gossip" ->    
+        | "gossip" ->
             let rumor = Rumor "I Love Distrubuted Systems"
             let! response = parent <? rumor
-            printfn "%s" response
+            timer.Stop()
         | "pushsum" ->
             let pushsum = PushSum(0.0, 0.0)
             let! response = parent <? pushsum
-            printfn "%s" response    
+            timer.Stop()
+        // System.Console.WriteLine("Time elapsed: {0}", timer.ElapsedMilliseconds)
+        printfn "Convergence Time: %s ms" <| timer.ElapsedMilliseconds.ToString()
+            
     } |> Async.RunSynchronously
 
 // let args : string array = fsi.CommandLineArgs |> Array.tail
@@ -173,17 +187,23 @@ let main n topology algorithm =
 // main 5 "imp2D" "gossip"
 // main 1000 "full" "gossip"
 
-// main 100 "line" "pushsum" // 15=15
-// main 20 "line" "pushsum" // 15=15
+// main 5 "line" "pushsum" // 15=15
+// main 20 "line" "pushsum" // 210
+// main 100 "line" "pushsum" // 5050=5050
+
 
 
 // 2D works
 // main 121 "2D" "pushsum" // 7381=7381
+// main 961 "2D" "pushsum" // wrong=462241
 
 // imp2D works
 // main 16 "imp2D" "pushsum" // 136=136
 // main 121 "imp2D" "pushsum" // 7381=7381
+// main 961 "imp2D" "pushsum" // 462241=462241
 
 // full works
-// main 5 "full" "pushsum" // 5050
+// main 5 "full" "pushsum" // 15
+main 100 "full" "pushsum" // 5050
 // main 1000 "full" "pushsum" // 500500
+// main 10000 "full" "pushsum" // 50005000
