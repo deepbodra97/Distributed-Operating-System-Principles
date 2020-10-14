@@ -145,7 +145,9 @@ let main n topology algorithm =
                             startRef <! ValueWeightInit (float startId, 1.0)
                             startRef <! PushSum(s, w)
                         | Done done_msg ->
-                            printfn "Node %s converged to %f" sender.Path.Name done_msg
+                            match algorithm with
+                            | "gossip" -> printfn "Node %s converged" sender.Path.Name
+                            | "pushsum" -> printfn "Node %s converged to %f" sender.Path.Name done_msg
                             messageCount <- messageCount + 1
                             if messageCount = numNodes then
                                 system.Terminate() |> ignore
@@ -179,14 +181,18 @@ let main n topology algorithm =
             
     } |> Async.RunSynchronously
 
-// let args : string array = fsi.CommandLineArgs |> Array.tail
-// let n = float args.[0]
-// let k = float args.[1]
-// let nActors = 8.0
+let args : string array = fsi.CommandLineArgs |> Array.tail
+let n = int args.[0]
+let topology = args.[1]
+let algorithm = args.[2]
+main n topology algorithm
+
 // main 5 "line" "gossip"
+// main 100 "line" "gossip"
+
 // main 1000 "2D" "gossip"
 // main 5 "imp2D" "gossip"
-main 1000 "full" "gossip"
+// main 1000 "full" "gossip"
 
 // main 5 "line" "pushsum" // 15=15
 // main 20 "line" "pushsum" // 210
