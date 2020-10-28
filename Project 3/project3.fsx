@@ -17,10 +17,13 @@ let main numNodes numRequests =
         rnd.Next(start, stop+1)
 
     let changeBase (x: int) (b: int) =
-        System.Convert.ToString(x, b).PadLeft(8, '0')
+        System.Convert.ToString(x, b).PadLeft(7, '0')
     
     let child (childMailbox: Actor<_>) = // nodes participating in gossip or pushsum
         let id = childMailbox.Self.Path.Name // id
+
+        let mutable largerLeaves = "1111111"
+        let mutable smallerLeaves = "0000000"
 
         let rec childLoop() =
             actor {   
@@ -51,7 +54,7 @@ let main numNodes numRequests =
                         | Start start ->
                             printfn "Parent received start"
                             for i in 1 .. numNodes do
-                                let id = changeBase (getRandomInt 1 1000) 2
+                                let id = changeBase (getRandomInt 1 100) 2
                                 activeNodes.[i-1] <- id
                                 let childRef = spawn parentMailbox id child
                                 if i = 1 then
