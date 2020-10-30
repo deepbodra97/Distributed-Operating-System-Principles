@@ -102,6 +102,7 @@ let main numNodes numRequests =
                     else
                         system.ActorSelection("/user/parent") <! JoinSuccess
                 | StartRequestPhase ->
+                    printfn "StartRequestPhase %s" id
                     cancelable <- system.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.Zero, (TimeSpan.FromMilliseconds(1000.0)), childMailbox.Self, (RequestTick), childMailbox.Self)
                 | Join newNode ->
                     if id = newNode then
@@ -123,26 +124,36 @@ let main numNodes numRequests =
                         // printfn "%s %A %A" id smallerLeaves largerLeaves
                         // printfn "%s %A" id routingTable
                 | RequestTick ->
+                    printfn "RequestTick %s" id
                     nRequests <- nRequests + 1
                     if nRequests = numRequests then
                         cancelable.Cancel ()
-                    // else
-                        // system.ActorSelection("/user/parent/") <! Route (id, activeNodes.[getRandomInt 0 (numNodes-1)], -1)
+                    else
+                        system.ActorSelection("/user/parent/"+id) <! Route (id, decimalTo (getRandomInt 1 numNodes) 16, -1)
+                        // system.ActorSelection("/user/parent/"+id) <! Route (id, (decimalTo 1 16), -1)
                 | Route (source, destination, nHops) ->
+                    printfn "Child %s received route" id
                     if id = destination then
                         system.ActorSelection("/user/parent") <! RouteSuccess (nHops+1)
                     else
                         if destination < id then
-                            if smallerLeaves.Count > 0 && destination >= smallerLeaves.MinimumElement then
-                                system.ActorSelection("/user/parent/"+(findClosest id smallerLeaves)) <! Route (source, destination, nHops+1)
+                            if smallerLeaves.Count > 0 then
+                                if abs(toDecimal(id)-toDecimal(destination)) < abs(toDecimal(findClosest destination smallerLeaves)-toDecimal(destination)) then
+                                    printfn "%s consumed a message" id
+                                    system.ActorSelection("/user/parent") <! RouteSuccess (nHops+1)
+                                elif destination >= smallerLeaves.MinimumElement then
+                                    system.ActorSelection("/user/parent/"+(findClosest id smallerLeaves)) <! Route (source, destination, nHops+1)
                             else
                                 forward source destination nHops
                         if destination > id then
-                            if largerLeaves.Count > 0 && destination <= largerLeaves.MaximumElement then
-                                system.ActorSelection("/user/parent/"+(findClosest id largerLeaves)) <! Route (source, destination, nHops+1)
+                            if largerLeaves.Count > 0 then
+                                if abs(toDecimal(id)-toDecimal(destination)) < abs(toDecimal(findClosest destination largerLeaves)-toDecimal(destination)) then
+                                    printfn "%s consumed a message" id
+                                    system.ActorSelection("/user/parent") <! RouteSuccess (nHops+1)
+                                elif destination <= largerLeaves.MaximumElement then
+                                    system.ActorSelection("/user/parent/"+(findClosest id largerLeaves)) <! Route (source, destination, nHops+1)
                             else
                                 forward source destination nHops
-                    printfn "Route"
                 | _ -> return ()
                 return! childLoop()
             }
@@ -177,6 +188,8 @@ let main numNodes numRequests =
                             if nSuccessfulJoins = numNodes then
                                 printfn "Everyone has joined"
                                 system.ActorSelection("/user/parent/*") <! StartRequestPhase
+                        | RouteSuccess nHops->
+                            printfn "RouteSuccess %d" nHops
                         | _ -> return ()
                         return! parentLoop()
                     }
