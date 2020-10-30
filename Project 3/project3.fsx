@@ -102,7 +102,9 @@ let main numNodes numRequests =
                     else
                         system.ActorSelection("/user/parent") <! JoinSuccess
                 | StartRequestPhase ->
-                    printfn "StartRequestPhase %s" id
+                    // printfn "StartRequestPhase %s" id
+                    // printfn "%s %A %A" id smallerLeaves largerLeaves
+                    // printfn "%s %A" id routingTable
                     cancelable <- system.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.Zero, (TimeSpan.FromMilliseconds(1000.0)), childMailbox.Self, (RequestTick), childMailbox.Self)
                 | Join newNode ->
                     if id = newNode then
@@ -126,23 +128,25 @@ let main numNodes numRequests =
                 | RequestTick ->
                     printfn "RequestTick %s" id
                     nRequests <- nRequests + 1
+                    system.ActorSelection("/user/parent/"+id) <! Route (id, decimalTo (getRandomInt 1 numNodes) 16, -1)
+                    // system.ActorSelection("/user/parent/"+id) <! Route (id, (decimalTo 1 16), -1)
                     if nRequests = numRequests then
                         cancelable.Cancel ()
-                    else
-                        system.ActorSelection("/user/parent/"+id) <! Route (id, decimalTo (getRandomInt 1 numNodes) 16, -1)
-                        // system.ActorSelection("/user/parent/"+id) <! Route (id, (decimalTo 1 16), -1)
                 | Route (source, destination, nHops) ->
                     printfn "Child %s received route" id
                     if id = destination then
+                        printfn "%s consumed a message" id
                         system.ActorSelection("/user/parent") <! RouteSuccess (nHops+1)
                     else
                         if destination < id then
                             if smallerLeaves.Count > 0 then
                                 if abs(toDecimal(id)-toDecimal(destination)) < abs(toDecimal(findClosest destination smallerLeaves)-toDecimal(destination)) then
-                                    printfn "%s consumed a message" id
+                                    printfn "Nearest %s consumed a message" id
                                     system.ActorSelection("/user/parent") <! RouteSuccess (nHops+1)
                                 elif destination >= smallerLeaves.MinimumElement then
                                     system.ActorSelection("/user/parent/"+(findClosest id smallerLeaves)) <! Route (source, destination, nHops+1)
+                                else
+                                    forward source destination nHops
                             else
                                 forward source destination nHops
                         if destination > id then
@@ -152,6 +156,8 @@ let main numNodes numRequests =
                                     system.ActorSelection("/user/parent") <! RouteSuccess (nHops+1)
                                 elif destination <= largerLeaves.MaximumElement then
                                     system.ActorSelection("/user/parent/"+(findClosest id largerLeaves)) <! Route (source, destination, nHops+1)
+                                else
+                                    forward source destination nHops
                             else
                                 forward source destination nHops
                 | _ -> return ()
