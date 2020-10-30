@@ -90,7 +90,7 @@ let main numNodes numRequests =
         let sendMatchingRows destination =
             let (row, _) = getRowCol destination
             for i in 0 .. row do
-                system.ActorSelection("/user/parent/"+destination) <! NewRow (row, routingTable.[row, *])
+                system.ActorSelection("/user/parent/"+destination) <! NewRow (row, routingTable.[row, *].Clone() :?> string[])
 
         let forward source destination nHops =
             let nextNode = lookupRoutingTable destination
@@ -235,4 +235,4 @@ let main numNodes numRequests =
 // let n = int args.[0]
 // let topology = args.[1]
 // let algorithm = args.[2]
-main 100 1
+main 10 1
