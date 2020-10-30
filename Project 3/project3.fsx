@@ -11,6 +11,7 @@ type Message =
     | StartRequestPhase
     | Join of string
     | JoinSuccess
+    | NewRow of int * string[]
     | Route of string * string * int
     | RouteSuccess of int
     | RequestTick
@@ -76,12 +77,20 @@ let main numNodes numRequests =
         let getRowCol destination =
             let commonPrefix = longestCommonPrefix id destination
             let row = String.length commonPrefix
-            let col =  destination.[String.length(commonPrefix)] |> hexToDecimal
-            row, col
+            if String.length(commonPrefix) < destination.Length then
+                let col =  destination.[String.length(commonPrefix)] |> hexToDecimal
+                row, col
+            else
+                row, 16
 
         let lookupRoutingTable destination =
             let (row, col) = getRowCol destination
             routingTable.[row, col]
+
+        let sendMatchingRows destination =
+            let (row, _) = getRowCol destination
+            for i in 0 .. row do
+                system.ActorSelection("/user/parent/"+destination) <! NewRow (row, routingTable.[row, *])
 
         let forward source destination nHops =
             let nextNode = lookupRoutingTable destination
@@ -123,8 +132,14 @@ let main numNodes numRequests =
                         elif newNode > id then
                             updateLargerLeaves newNode
                             system.ActorSelection("/user/parent/"+(findClosest id largerLeaves)) <! Join newNode
+                        sendMatchingRows newNode
                         // printfn "%s %A %A" id smallerLeaves largerLeaves
                         // printfn "%s %A" id routingTable
+                | NewRow (row_num, row) ->
+                    printfn "NewRow %A" row
+                    for i in 0 .. row.Length-1 do
+                        if routingTable.[row_num, i] = "" then
+                            routingTable.[row_num, i] <- row.[i]
                 | RequestTick ->
                     printfn "RequestTick %s" id
                     nRequests <- nRequests + 1
@@ -220,4 +235,4 @@ let main numNodes numRequests =
 // let n = int args.[0]
 // let topology = args.[1]
 // let algorithm = args.[2]
-main 10 1
+main 100 1
