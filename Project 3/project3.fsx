@@ -20,6 +20,7 @@ type Message =
 // main program
 let main numNodes numRequests =
     use system = ActorSystem.Create("Project3") // create an actor systems
+
     let getRandomInt start stop =  // get random integer [start, stop]
         let rnd = System.Random()
         rnd.Next(start, stop+1)
@@ -101,13 +102,13 @@ let main numNodes numRequests =
             let nextNode = lookupRoutingTable destination
             if nextNode = "" then
                 if destination < id && smallerLeaves.Count > 0 then
-                    printfn "No entry in routing table. Using smaller leaves"
+                    // printfn "No entry in routing table. Using smaller leaves"
                     system.ActorSelection("/user/parent/"+smallerLeaves.MinimumElement) <! Route (source, destination, nHops+1)
                 elif destination > id && largerLeaves.Count > 0 then
-                    printfn "No entry in routing table. Using larger leaves"
+                    // printfn "No entry in routing table. Using larger leaves"
                     system.ActorSelection("/user/parent/"+largerLeaves.MaximumElement) <! Route (source, destination, nHops+1)
                 else
-                    printfn "Node %s cannont route request for %s %A %A" id destination smallerLeaves largerLeaves
+                    // printfn "Node %s cannont route request for %s %A %A" id destination smallerLeaves largerLeaves
                     system.ActorSelection("/user/parent") <! RouteSuccess (nHops+1)
             else
                 system.ActorSelection("/user/parent/"+nextNode) <! Route (source, destination, nHops+1)
@@ -130,10 +131,10 @@ let main numNodes numRequests =
                     cancelable <- system.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.Zero, (TimeSpan.FromMilliseconds(1000.0)), childMailbox.Self, (RequestTick), childMailbox.Self)
                 | Join newNode ->
                     if id = newNode then
-                        printfn "%s got its join message back" id
+                        // printfn "%s got its join message back" id
                         system.ActorSelection("/user/parent") <! JoinSuccess
                     else
-                        printfn "%s joined" newNode
+                        // printfn "%s joined" newNode
                         if (lookupRoutingTable newNode) = "" then
                             let (row, col) = getRowCol newNode
                             routingTable.[row, col] <- newNode
@@ -150,7 +151,7 @@ let main numNodes numRequests =
                         // printfn "%s %A %A" id smallerLeaves largerLeaves
                         // printfn "%s %A" id routingTable
                 | NewRow (row_num, row) ->
-                    printfn "NewRow %A" row
+                    // printfn "NewRow %A" row
                     for i in 0 .. row.Length-1 do
                         if routingTable.[row_num, i] = "" then
                             routingTable.[row_num, i] <- row.[i]
@@ -160,22 +161,22 @@ let main numNodes numRequests =
                             if leaf < id then updateSmallerLeaves leaf
                             else updateLargerLeaves leaf
                 | RequestTick ->
-                    printfn "RequestTick %s" id
+                    // printfn "RequestTick %s" id
                     nRequests <- nRequests + 1
                     system.ActorSelection("/user/parent/"+id) <! Route (id, decimalTo (getRandomInt 1 numNodes) 16, -1)
                     // system.ActorSelection("/user/parent/"+id) <! Route (id, (decimalTo 1 16), -1)
                     if nRequests = numRequests then
                         cancelable.Cancel ()
                 | Route (source, destination, nHops) ->
-                    printfn "Child %s received route" id
+                    // printfn "Child %s received route" id
                     if id = destination then
-                        printfn "%s consumed a message" id
+                        // printfn "%s consumed a message" id
                         system.ActorSelection("/user/parent") <! RouteSuccess (nHops+1)
                     else
                         if destination < id then
                             if smallerLeaves.Count > 0 then
                                 if abs(toDecimal(id)-toDecimal(destination)) < abs(toDecimal(findClosest destination smallerLeaves)-toDecimal(destination)) then
-                                    printfn "Nearest %s consumed a message" id
+                                    // printfn "Nearest %s consumed a message" id
                                     system.ActorSelection("/user/parent") <! RouteSuccess (nHops+1)
                                 elif destination >= smallerLeaves.MinimumElement then
                                     system.ActorSelection("/user/parent/"+(findClosest id smallerLeaves)) <! Route (source, destination, nHops+1)
@@ -186,7 +187,7 @@ let main numNodes numRequests =
                         if destination > id then
                             if largerLeaves.Count > 0 then
                                 if abs(toDecimal(id)-toDecimal(destination)) < abs(toDecimal(findClosest destination largerLeaves)-toDecimal(destination)) then
-                                    printfn "%s consumed a message" id
+                                    // printfn "%s consumed a message" id
                                     system.ActorSelection("/user/parent") <! RouteSuccess (nHops+1)
                                 elif destination <= largerLeaves.MaximumElement then
                                     system.ActorSelection("/user/parent/"+(findClosest id largerLeaves)) <! Route (source, destination, nHops+1)
@@ -209,6 +210,17 @@ let main numNodes numRequests =
                 let mutable nSuccessfulJoins = 0
                 let mutable nSuccessfulRequests = 0
                 let mutable nHops = 0
+                
+                let maxId = 10000000
+                let set = [| for i in 1 .. maxId -> i |]
+                let mutable lastIndex = maxId-1
+                let getUniqueRandomNumber () =
+                    let idx = getRandomInt 0 lastIndex
+                    let picked = set.[idx]
+                    set.[idx] <- set.[lastIndex]
+                    set.[lastIndex] <- picked
+                    lastIndex <- lastIndex - 1
+                    picked
 
                 let rec parentLoop() =
                     actor {
@@ -219,7 +231,7 @@ let main numNodes numRequests =
                             printfn "Parent received start"
                             mainSender <- sender
                             for i in 1 .. numNodes do
-                                let id = decimalTo (getRandomInt 1 1000000) 16
+                                let id = decimalTo (getUniqueRandomNumber ()) 16
                                 activeNodes.[i-1] <- id
                                 let childRef = spawn parentMailbox id child
                                 if i = 1 then
@@ -230,13 +242,14 @@ let main numNodes numRequests =
                         | JoinSuccess ->
                             nSuccessfulJoins <- nSuccessfulJoins + 1
                             if nSuccessfulJoins = numNodes then
-                                printfn "Everyone has joined"
+                                printfn "All nodes have joined and routing tables have converged"
                                 system.ActorSelection("/user/parent/*") <! StartRequestPhase
                         | RouteSuccess hops->
-                            printfn "RouteSuccess %d" hops
+                            // printfn "RouteSuccess %d" hops
                             nSuccessfulRequests <- nSuccessfulRequests + 1
                             nHops <- nHops + hops
                             if nSuccessfulRequests = (numRequests * numNodes) then
+                                printfn "All requests have been served"
                                 printfn "Average hops per requests = %f" (float(nHops)/(float(numRequests)*float(numNodes)))
                                 system.Terminate() |> ignore
                                 mainSender <! "Done"
@@ -260,8 +273,8 @@ let main numNodes numRequests =
         printfn "Exit"
     } |> Async.RunSynchronously
 
-// let args : string array = fsi.CommandLineArgs |> Array.tail
-// let n = int args.[0]
-// let topology = args.[1]
+let args : string array = fsi.CommandLineArgs |> Array.tail
+let numNodes = int args.[0]
+let numRequests = int args.[1]
 // let algorithm = args.[2]
-main 100 1
+main numNodes numRequests
