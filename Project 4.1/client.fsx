@@ -2,8 +2,30 @@
 
 open Akka.Actor
 open Akka.FSharp
+open Akka.Configuration
+open Akka.Serialization
 open System
 open System.Diagnostics
+
+let configuration = 
+    ConfigurationFactory.ParseString(
+        @"akka {
+            actor{
+                provider = ""Akka.Remote.RemoteActorRefProvider, Akka.Remote""
+                serializers {
+                    hyperion = ""Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""
+                }
+                serialization-bindings {
+                    ""System.Object"" = hyperion
+                }
+            }
+            remote {
+                helios.tcp {
+                    port = 0
+                    hostname = 127.0.0.1
+                }
+            }
+        }")
 
 // different message types
 // type Message =
@@ -19,7 +41,7 @@ open System.Diagnostics
 
 // main program
 let main numNodes =
-    use system = ActorSystem.Create("Project3") // create an actor system
+    use system = ActorSystem.Create("Project4.1") // create an actor system
 
     let getRandomInt start stop =  // get random integer [start, stop]
         let rnd = System.Random()
@@ -50,11 +72,6 @@ let main numNodes =
                         let! (msg: Message) = parentMailbox.Receive() // fetch the message from the queue
                         let sender = parentMailbox.Sender()
                         match msg with
-                        | Start start -> // spawn pastry nodes one by one
-                            printfn "Join phase: Please wait for all the nodes to join the network"
-                            mainSender <- sender
-                            // for i in 1 .. numNodes do
-                            
                         | _ -> return ()
                         return! parentLoop()
                     }
@@ -68,7 +85,7 @@ let main numNodes =
 
 
     async {
-        let! response = parent <? Start "0"
+        let! response = parent <? "0"
         printfn ""
     } |> Async.RunSynchronously
 
