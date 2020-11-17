@@ -26,10 +26,16 @@ let configuration =
             }
         }")
 
+type User = {
+    id: string
+    username: string
+    password: string
+}
+
 // different message types
 type Message =
     | Start of string // parent starts spawning nodes. Nodes start joining
-    | Register of string
+    | Register of User
     // | StartRequestPhase // Nodes start making 1 request per second
     // | Join of string // route the Join packet
     // | JoinSuccess // parent know that a node has finished joining
@@ -48,14 +54,16 @@ let main () =
             <| fun mailbox ->
                 let id = mailbox.Self.Path.Name // id
 
+                let mutable usersMap = Map.empty
+
                 let rec loop() =
                     actor {   
                         let! (msg: Message) = mailbox.Receive() // fetch the message from the queue
                         let sender = mailbox.Sender()
                         match msg with
-                        | Register id ->
-                            
-                            printfn "Client %s registered" id
+                        | Register user ->
+                            usersMap <- usersMap.Add(user.username, user)
+                            printfn "User %A registered" user
                         | _ -> return ()
                         return! loop()
                     }

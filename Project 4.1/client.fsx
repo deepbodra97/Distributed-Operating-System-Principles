@@ -26,10 +26,16 @@ let configuration =
             }
         }")
 
+type User = {
+    id: string
+    username: string
+    password: string
+}
+
 // different message types
 type Message =
     | Start of string // parent starts spawning nodes. Nodes start joining
-    | Register of string
+    | Register of User
     // | StartRequestPhase // Nodes start making 1 request per second
     // | Join of string // route the Join packet
     // | JoinSuccess // parent know that a node has finished joining
@@ -46,20 +52,28 @@ let main numNodes =
     let getRandomInt start stop =  // get random integer [start, stop]
         let rnd = System.Random()
         rnd.Next(start, stop+1)
+    
+    let getRandomString n =
+        let r = System.Random()
+        let chars = Array.concat([[|'a' .. 'z'|];[|'A' .. 'Z'|];[|'0' .. '9'|]])
+        let sz = Array.length chars in
+        System.String(Array.init n (fun _ -> chars.[r.Next sz]))
 
     let client (childMailbox: Actor<_>) = // client node
-        let id = childMailbox.Self.Path.Name // id
+        let mId = childMailbox.Self.Path.Name // id
         // let mutable cancelable = Unchecked.defaultof<ICancelable> // to cancel making requests
+        let mServer = system.ActorSelection("akka.tcp://twitter@127.0.0.1:9001/user/server")
+
+        let mutable mUser = Unchecked.defaultof<User>
 
         let rec clientLoop() =
             actor {   
                 let! msg = childMailbox.Receive() // fetch the message from the queue
                 let sender = childMailbox.Sender()
                 match msg with
-                | Register myId ->
-                    let server = system.ActorSelection("akka.tcp://twitter@127.0.0.1:9001/user/server")
-                    let reg:Message = Register myId
-                    server <! reg
+                | Register register -> // register is of type User
+                    mUser <- { register with username = getRandomString 5; password = getRandomString 8 }
+                    mServer <! Register mUser
                 | _ -> return ()
                 return! clientLoop()
             }
@@ -79,7 +93,7 @@ let main numNodes =
                             printfn "parent received start"
                             for i in 1 .. numNodes do
                                 let clientRef = spawn parentMailbox (string i) (client)
-                                clientRef <! Register (string i)
+                                clientRef <! Register {id=string i; username=""; password=""}
                         | _ -> return ()
                         return! parentLoop()
                     }
@@ -96,6 +110,6 @@ let main numNodes =
         printfn ""
     } |> Async.RunSynchronously
 
-// let args : string array = fsi.CommandLineArgs |> Array.tail
-// let numNodes = int args.[0]
-main 1
+let args : string array = fsi.CommandLineArgs |> Array.tail
+let numNodes = int args.[0]
+main numNodes
