@@ -1,11 +1,10 @@
-#r "nuget: Akka.FSharp"
-
+#r "nuget: Akka.FSharp" 
+#r "nuget: Akka.Remote"
+#r "nuget: Akka.Serialization.Hyperion"
 open Akka.Actor
 open Akka.FSharp
 open Akka.Configuration
 open Akka.Serialization
-open System
-open System.Diagnostics
 
 let configuration = 
     ConfigurationFactory.ParseString(
@@ -28,8 +27,9 @@ let configuration =
         }")
 
 // different message types
-// type Message =
-    // | Start of string // parent starts spawning nodes. Nodes start joining
+type Message =
+    | Start of string // parent starts spawning nodes. Nodes start joining
+    | Register of string
     // | StartRequestPhase // Nodes start making 1 request per second
     // | Join of string // route the Join packet
     // | JoinSuccess // parent know that a node has finished joining
@@ -41,26 +41,29 @@ let configuration =
 
 // main program
 let main numNodes =
-    use system = ActorSystem.Create("Project4.1") // create an actor system
+    let system = ActorSystem.Create("ClientSimulator", configuration) // create an actor system
 
     let getRandomInt start stop =  // get random integer [start, stop]
         let rnd = System.Random()
         rnd.Next(start, stop+1)
 
-    let child (childMailbox: Actor<_>) = // pastry node
-        let id = childMailbox.Self.Path.Name // id (hexadecimal)
-        let mutable cancelable = Unchecked.defaultof<ICancelable> // to cancel making requests
+    let client (childMailbox: Actor<_>) = // client node
+        let id = childMailbox.Self.Path.Name // id
+        // let mutable cancelable = Unchecked.defaultof<ICancelable> // to cancel making requests
 
-        let rec childLoop() =
+        let rec clientLoop() =
             actor {   
                 let! msg = childMailbox.Receive() // fetch the message from the queue
                 let sender = childMailbox.Sender()
                 match msg with
+                | Register myId ->
+                    let server = system.ActorSelection("akka.tcp://twitter@127.0.0.1:9001/user/server")
+                    let reg:Message = Register myId
+                    server <! reg
                 | _ -> return ()
-                return! childLoop()
+                return! clientLoop()
             }
-
-        childLoop()
+        clientLoop()
 
     let parent = // job assignment actor (parent, supervisor)
         spawnOpt system "parent"
@@ -72,6 +75,11 @@ let main numNodes =
                         let! (msg: Message) = parentMailbox.Receive() // fetch the message from the queue
                         let sender = parentMailbox.Sender()
                         match msg with
+                        | Start start ->
+                            printfn "parent received start"
+                            for i in 1 .. numNodes do
+                                let clientRef = spawn parentMailbox (string i) (client)
+                                clientRef <! Register (string i)
                         | _ -> return ()
                         return! parentLoop()
                     }
@@ -83,12 +91,11 @@ let main numNodes =
                     match e with 
                     | _ -> SupervisorStrategy.DefaultDecider.Decide(e)))]
 
-
     async {
-        let! response = parent <? "0"
+        let! response = parent <? Start "start"
         printfn ""
     } |> Async.RunSynchronously
 
-let args : string array = fsi.CommandLineArgs |> Array.tail
-let numNodes = int args.[0]
-main numNodes
+// let args : string array = fsi.CommandLineArgs |> Array.tail
+// let numNodes = int args.[0]
+main 1

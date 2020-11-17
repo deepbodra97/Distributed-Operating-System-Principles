@@ -1,10 +1,11 @@
-#r "nuget: Akka.FSharp"
+#r "nuget: Akka.FSharp" 
+#r "nuget: Akka.Remote"
+#r "nuget: Akka.Serialization.Hyperion"
 
 open Akka.Actor
 open Akka.FSharp
 open Akka.Configuration
 open Akka.Serialization
-open System
 open System.Diagnostics
 
 let configuration = 
@@ -26,8 +27,9 @@ let configuration =
         }")
 
 // different message types
-// type Message =
-    // | Start of string // parent starts spawning nodes. Nodes start joining
+type Message =
+    | Start of string // parent starts spawning nodes. Nodes start joining
+    | Register of string
     // | StartRequestPhase // Nodes start making 1 request per second
     // | Join of string // route the Join packet
     // | JoinSuccess // parent know that a node has finished joining
@@ -39,7 +41,7 @@ let configuration =
 
 // main program
 let main () =
-    use system = ActorSystem.Create("Twitter") // create an actor system
+    let system = ActorSystem.Create("twitter", configuration) // create an actor system
 
     let server =
         spawn system "server"
@@ -48,9 +50,12 @@ let main () =
 
                 let rec loop() =
                     actor {   
-                        let! msg = mailbox.Receive() // fetch the message from the queue
+                        let! (msg: Message) = mailbox.Receive() // fetch the message from the queue
                         let sender = mailbox.Sender()
                         match msg with
+                        | Register id ->
+                            
+                            printfn "Client %s registered" id
                         | _ -> return ()
                         return! loop()
                     }
@@ -58,7 +63,8 @@ let main () =
 
 
     async {
-        let! response = server <? ()
+        // let! response = server <? ()
+        System.Console.ReadLine() |> ignore
         printfn ""
     } |> Async.RunSynchronously
 
