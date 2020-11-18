@@ -32,10 +32,17 @@ type User = {
     password: string
 }
 
+type Tweet = {
+    id: string
+    text: string
+    by: User
+}
+
 // different message types
 type Message =
     | Start of string // parent starts spawning nodes. Nodes start joining
     | Register of User
+    | Tweet of Tweet
     // | StartRequestPhase // Nodes start making 1 request per second
     // | Join of string // route the Join packet
     // | JoinSuccess // parent know that a node has finished joining
@@ -49,15 +56,32 @@ type Message =
 let main numNodes =
     let system = ActorSystem.Create("ClientSimulator", configuration) // create an actor system
 
+    let mutable usernames = Array.empty
+
     let getRandomInt start stop =  // get random integer [start, stop]
         let rnd = System.Random()
         rnd.Next(start, stop+1)
     
     let getRandomString n =
-        let r = System.Random()
+        let rnd = System.Random()
         let chars = Array.concat([[|'a' .. 'z'|];[|'A' .. 'Z'|];[|'0' .. '9'|]])
         let sz = Array.length chars in
-        System.String(Array.init n (fun _ -> chars.[r.Next sz]))
+        System.String(Array.init n (fun _ -> chars.[rnd.Next sz]))
+
+    let getRandomTweet () =
+        let getRandomMention () = 
+            if (getRandomInt 0 1) = 0 then
+                "@" + usernames.[(getRandomInt 0 (usernames.Length-1))]
+            else
+                ""
+    
+        let getRandomHashTag () = 
+            if (getRandomInt 0 1) = 0 then
+                "#" + getRandomString (getRandomInt 3 10)
+            else
+                ""
+        let tweet = (getRandomString(getRandomInt 10 20)) + getRandomMention () + getRandomHashTag ()
+        tweet
 
     let client (childMailbox: Actor<_>) = // client node
         let mId = childMailbox.Self.Path.Name // id
@@ -71,9 +95,11 @@ let main numNodes =
                 let! msg = childMailbox.Receive() // fetch the message from the queue
                 let sender = childMailbox.Sender()
                 match msg with
-                | Register register -> // register is of type User
-                    mUser <- { register with username = getRandomString 5; password = getRandomString 8 }
+                | Register user -> // register is of type User
+                    mUser <- user
                     mServer <! Register mUser
+                | Tweet tweet ->
+                    mServer <! Tweet tweet
                 | _ -> return ()
                 return! clientLoop()
             }
@@ -83,7 +109,7 @@ let main numNodes =
         spawnOpt system "parent"
             <| fun parentMailbox ->
                 let mutable mainSender = Unchecked.defaultof<IActorRef> // main program
-                
+
                 let rec parentLoop() =
                     actor {
                         let! (msg: Message) = parentMailbox.Receive() // fetch the message from the queue
@@ -93,7 +119,16 @@ let main numNodes =
                             printfn "parent received start"
                             for i in 1 .. numNodes do
                                 let clientRef = spawn parentMailbox (string i) (client)
-                                clientRef <! Register {id=string i; username=""; password=""}
+                                let username = getRandomString 5
+                                let password = getRandomString 8
+                                usernames <- Array.append usernames [|username|]
+                                let user = {id=string i; username=username; password=password}
+                                clientRef <! Register user
+
+                                // Tweet
+                                let tweet = {id=getRandomString 5; text=getRandomTweet(); by=user} 
+                                clientRef <! Tweet tweet                           
+
                         | _ -> return ()
                         return! parentLoop()
                     }
