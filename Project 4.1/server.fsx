@@ -94,6 +94,7 @@ let main () =
         spawn system "server"
             <| fun mailbox ->
                 let id = mailbox.Self.Path.Name // id
+                let clientSimulatorAddress = "akka.tcp://ClientSimulator@127.0.0.1:9002/user/parent/"
 
                 let mutable onlineUsers: Set<string> = Set.empty
                 let mutable usersMap: Map<string, User> = Map.empty
@@ -145,7 +146,7 @@ let main () =
                             if subscribersMap.ContainsKey(newTweet.by.username) then
                                 for subscriber in subscribersMap.Item(newTweet.by.username) do
                                     if onlineUsers.Contains(subscriber) then
-                                        system.ActorSelection("akka.tcp://ClientSimulator@127.0.0.1:9002/user/parent/"+usersMap.Item(subscriber).id) <! LiveTweet newTweet
+                                        system.ActorSelection(clientSimulatorAddress+usersMap.Item(subscriber).id) <! LiveTweet newTweet
                                         printfn "Tweet sent to online user %s" subscriber
                             printfn "%A %A %A" tweetsByUsername tweetsByHashTag tweetsByMention
                             
@@ -170,10 +171,12 @@ let main () =
                                     for tweetId in tweetIds do
                                         response <- Array.append response [|tweetsMap.Item(tweetId)|]
                             | "hashtag" ->
-                                for tweetId in tweetsByHashTag.Item(query.qName) do
+                                let tweetIds = if tweetsByHashTag.ContainsKey(query.qName) then tweetsByHashTag.Item(query.qName) else [||]
+                                for tweetId in tweetIds do
                                     response <- Array.append response [|tweetsMap.Item(tweetId)|]
                             | "mention" ->
-                                for tweetId in tweetsByMention.Item(query.qName) do
+                                let tweetIds = if tweetsByMention.ContainsKey(query.qName) then tweetsByMention.Item(query.qName) else [||]
+                                for tweetId in tweetIds do
                                     response <- Array.append response [|tweetsMap.Item(tweetId)|]
                             | _ -> printfn "Invalid Query Type"
                             sender <! QueryResponse response
