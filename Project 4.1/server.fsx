@@ -36,7 +36,9 @@ type User = {
 
 type Tweet = {
     id: string
+    reId: string
     text: string
+    tType: string
     by: User
 }
 
@@ -50,6 +52,7 @@ type Subscribe = {
     publisher: string
     subscriber: string
 }
+
 
 // different message types
 type Message =
@@ -106,27 +109,28 @@ let main () =
                             usersMap <- usersMap.Add(user.username, user)
                             printfn "User %A registered" user
                         | Tweet tweet ->
-                            
-                            tweetsMap <- tweetsMap.Add(tweet.id, tweet)
+                            let newTweet = if tweet.tType = "tweet" then tweet else {tweet with text=tweetsMap.Item(tweet.reId).text}
+                            tweetsMap <- tweetsMap.Add(newTweet.id, newTweet)
 
-                            let mutable tweetIds = if tweetsByUsername.ContainsKey(tweet.by.username) then tweetsByUsername.Item(tweet.by.username) else [||]
-                            tweetIds <- Array.append tweetIds [|tweet.id|]
-                            tweetsByUsername <- tweetsByUsername.Add(tweet.by.username, tweetIds)
+                            let mutable tweetIds = if tweetsByUsername.ContainsKey(tweet.by.username) then tweetsByUsername.Item(newTweet.by.username) else [||]
+                            tweetIds <- Array.append tweetIds [|newTweet.id|]
+                            tweetsByUsername <- tweetsByUsername.Add(newTweet.by.username, tweetIds)
 
-                            let hashTags = getPatternMatches regexHashTag tweet.text
-                            let mentions = getPatternMatches regexMention tweet.text
+                            let hashTags = getPatternMatches regexHashTag newTweet.text
+                            let mentions = getPatternMatches regexMention newTweet.text
                             
                             for tag in hashTags do
                                 let mutable tweetIds = if tweetsByHashTag.ContainsKey(tag) then tweetsByHashTag.Item(tag) else [||]
-                                tweetIds <- Array.append tweetIds [|tweet.id|]
+                                tweetIds <- Array.append tweetIds [|newTweet.id|]
                                 tweetsByHashTag <- tweetsByHashTag.Add(tag, tweetIds)
                             
                             for mention in mentions do
                                 let mutable tweetIds = if tweetsByMention.ContainsKey(mention) then tweetsByMention.Item(mention) else [||]
-                                tweetIds <- Array.append tweetIds [|tweet.id|]
+                                tweetIds <- Array.append tweetIds [|newTweet.id|]
                                 tweetsByMention <- tweetsByMention.Add(mention, tweetIds)
+                            
                             printfn "%A %A %A" tweetsByUsername tweetsByHashTag tweetsByMention
-                            printfn "New Tweet %A" tweet
+                            printfn "New Tweet %A" newTweet
                         | Subscribe subscribe ->
                             let mutable subscriptions = if subscriptionsMap.ContainsKey(subscribe.subscriber) then subscriptionsMap.Item(subscribe.subscriber) else [||]
                             subscriptions <- Array.append subscriptions [|subscribe.publisher|]

@@ -34,7 +34,9 @@ type User = {
 
 type Tweet = {
     id: string
+    reId: string
     text: string
+    tType: string
     by: User
 }
 
@@ -146,13 +148,18 @@ let main numNodes =
                                 clientRef <! Register user
 
                                 // Tweet
-                                let tweet = {id=getRandomString 5; text="def #abc @ghi"; by=user} 
+                                let tweet = {id="1"; reId=""; text="def #abc @ghi"; tType="tweet"; by=user} 
                                 clientRef <! Tweet tweet
                                 clientRef <! Tweet tweet
 
                                 // Query
                                 let query = {qType="mention"; qName="@ghi"; by=user}
-                                clientRef <! Query query                            
+                                clientRef <! Query query      
+
+                                // Retweet
+                                let retweet = {id=getRandomString 5; reId="1"; text=""; tType="retweet"; by=user} 
+                                clientRef <! Tweet retweet
+                                // clientRef <! Tweet retweet                      
                         | _ -> return ()
                         return! parentLoop()
                     }
