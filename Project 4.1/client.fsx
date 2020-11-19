@@ -20,7 +20,7 @@ let configuration =
             }
             remote {
                 helios.tcp {
-                    port = 0
+                    port = 9002
                     hostname = 127.0.0.1
                 }
             }
@@ -58,6 +58,7 @@ type Message =
     | Login of User
     | Logout of User
     | Tweet of Tweet
+    | LiveTweet of Tweet
     | Query of Query
     | QueryResponse of Tweet array
     | Subscribe of Subscribe 
@@ -116,8 +117,12 @@ let main numNodes =
                 | Register user -> // register is of type User
                     mUser <- user
                     mServer <! Register mUser
+                | Subscribe subscribe ->
+                    mServer <! Subscribe subscribe
                 | Tweet tweet ->
                     mServer <! Tweet tweet
+                | LiveTweet tweet ->
+                    printfn "%s received live tweet %s" mId tweet.text
                 | Query query ->
                     mServer <! Query query
                 | QueryResponse response ->
@@ -153,6 +158,10 @@ let main numNodes =
                                 let tweet = {id="1"; reId=""; text="def #abc @ghi"; tType="tweet"; by=user} 
                                 clientRef <! Tweet tweet
                                 clientRef <! Tweet tweet
+
+                                // Subscribe to self for testing
+                                let subscribe = {publisher=username; subscriber=username}
+                                clientRef <! Subscribe subscribe
 
                                 // Query
                                 let query = {qType="mention"; qName="@ghi"; by=user}

@@ -61,6 +61,7 @@ type Message =
     | Login of User
     | Logout of User
     | Tweet of Tweet
+    | LiveTweet of Tweet // not used for server
     | Query of Query
     | QueryResponse of Tweet array
     | Subscribe of Subscribe
@@ -119,6 +120,7 @@ let main () =
                             onlineUsers <- onlineUsers.Remove(user.username)
                             printfn "User %A logged out" user
                         | Tweet tweet ->
+                            printfn "New Tweet %A" tweet
                             let newTweet = if tweet.tType = "tweet" then tweet else {tweet with text=tweetsMap.Item(tweet.reId).text}
                             tweetsMap <- tweetsMap.Add(newTweet.id, newTweet)
 
@@ -139,8 +141,14 @@ let main () =
                                 tweetIds <- Array.append tweetIds [|newTweet.id|]
                                 tweetsByMention <- tweetsByMention.Add(mention, tweetIds)
                             
+                            // Send tweets to online users
+                            if subscribersMap.ContainsKey(newTweet.by.username) then
+                                for subscriber in subscribersMap.Item(newTweet.by.username) do
+                                    if onlineUsers.Contains(subscriber) then
+                                        system.ActorSelection("akka.tcp://ClientSimulator@127.0.0.1:9002/user/parent/"+usersMap.Item(subscriber).id) <! LiveTweet newTweet
+                                        printfn "Tweet sent to online user %s" subscriber
                             printfn "%A %A %A" tweetsByUsername tweetsByHashTag tweetsByMention
-                            printfn "New Tweet %A" newTweet
+                            
                         | Subscribe subscribe ->
                             let mutable subscriptions = if subscriptionsMap.ContainsKey(subscribe.subscriber) then subscriptionsMap.Item(subscribe.subscriber) else [||]
                             subscriptions <- Array.append subscriptions [|subscribe.publisher|]
