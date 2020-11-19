@@ -119,7 +119,7 @@ let main () =
                             
                             for mention in mentions do
                                 let mutable tweetIds =
-                                    if tweetsByMention.ContainsKey(tweet.id) then tweetsByMention.Item(tweet.id)
+                                    if tweetsByMention.ContainsKey(mention) then tweetsByMention.Item(mention)
                                     else [||]
                                 tweetIds <- Array.append tweetIds [|tweet.id|]
                                 tweetsByMention <- tweetsByMention.Add(mention, tweetIds)
@@ -134,7 +134,9 @@ let main () =
                             | "hashtag" ->
                                 for tweetId in tweetsByHashTag.Item(query.qName) do
                                     response <- Array.append response [|tweetsMap.Item(tweetId)|]
-                            // | "mention" ->
+                            | "mention" ->
+                                for tweetId in tweetsByMention.Item(query.qName) do
+                                    response <- Array.append response [|tweetsMap.Item(tweetId)|]
                             sender <! QueryResponse response
                         | _ -> return ()
                         return! loop()

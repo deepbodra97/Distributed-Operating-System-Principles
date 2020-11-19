@@ -140,13 +140,13 @@ let main numNodes =
                                 clientRef <! Register user
 
                                 // Tweet
-                                let tweet = {id=getRandomString 5; text="def #abc"; by=user} 
+                                let tweet = {id=getRandomString 5; text="def #abc @ghi"; by=user} 
                                 clientRef <! Tweet tweet
                                 clientRef <! Tweet tweet
 
                                 // Query
-                                let query = {qType="hashtag"; qName="#abc"; by=user}
-                                clientRef <! Query query                               
+                                let query = {qType="mention"; qName="@ghi"; by=user}
+                                clientRef <! Query query                            
                         | _ -> return ()
                         return! parentLoop()
                     }
