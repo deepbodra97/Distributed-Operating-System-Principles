@@ -61,21 +61,14 @@ type Message =
     | LiveTweet of Tweet
     | Query of Query
     | QueryResponse of Tweet array
-    | Subscribe of Subscribe 
-    // | StartRequestPhase // Nodes start making 1 request per second
-    // | Join of string // route the Join packet
-    // | JoinSuccess // parent know that a node has finished joining
-    // | NewRow of int * string[] //  (row number, row of routing table)
-    // | NewLeaves of Set<string> // leaf set
-    // | Route of string * string * int // route the Route(request) packet
-    // | RouteSuccess of int // report number of hops to parent
-    // | RequestTick // tick every 1 second
+    | Subscribe of Subscribe
 
 // main program
 let main numNodes =
     let system = ActorSystem.Create("ClientSimulator", configuration) // create an actor system
 
     let mutable usernames = Array.empty
+    let mutable zipfConstant = 0.0
 
     let getRandomInt start stop =  // get random integer [start, stop]
         let rnd = System.Random()
@@ -117,8 +110,11 @@ let main numNodes =
                 | Register user -> // register is of type User
                     mUser <- user
                     mServer <! Register mUser
-                | Subscribe subscribe ->
-                    mServer <! Subscribe subscribe
+                | Subscribe s ->
+                    let numToSubscribe = int(zipfConstant*float(numNodes)/float(mUser.id))
+                    for i in 1 .. numToSubscribe do
+                        let subscribe = {s with publisher=usernames.[(getRandomInt 0 (usernames.Length-1))]; subscriber=mUser.username}
+                        mServer <! Subscribe subscribe
                 | Tweet tweet ->
                     mServer <! Tweet tweet
                 | LiveTweet tweet ->
@@ -147,6 +143,8 @@ let main numNodes =
                         | Start start ->
                             printfn "parent received start"
                             for i in 1 .. numNodes do
+                                zipfConstant <- zipfConstant + 1.0/float(i)
+
                                 let clientRef = spawn parentMailbox (string i) (client)
                                 let username = getRandomString 5
                                 let password = getRandomString 8
@@ -155,21 +153,21 @@ let main numNodes =
                                 clientRef <! Register user
 
                                 // Tweet
-                                let tweet = {id="1"; reId=""; text="def #abc @ghi"; tType="tweet"; by=user} 
-                                clientRef <! Tweet tweet
-                                clientRef <! Tweet tweet
+                                // let tweet = {id="1"; reId=""; text="def #abc @ghi"; tType="tweet"; by=user} 
+                                // clientRef <! Tweet tweet
+                                // clientRef <! Tweet tweet
 
                                 // Subscribe to self for testing
-                                let subscribe = {publisher=username; subscriber=username}
+                                let subscribe = {publisher=""; subscriber=""}
                                 clientRef <! Subscribe subscribe
 
                                 // Query
-                                let query = {qType="mention"; qName="@ghi"; by=user}
-                                clientRef <! Query query      
+                                // let query = {qType="mention"; qName="@ghi"; by=user}
+                                // clientRef <! Query query      
 
                                 // Retweet
-                                let retweet = {id=getRandomString 5; reId="1"; text=""; tType="retweet"; by=user} 
-                                clientRef <! Tweet retweet
+                                // let retweet = {id=getRandomString 5; reId="1"; text=""; tType="retweet"; by=user} 
+                                // clientRef <! Tweet retweet
                                 // clientRef <! Tweet retweet                      
                         | _ -> return ()
                         return! parentLoop()

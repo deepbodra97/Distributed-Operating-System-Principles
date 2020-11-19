@@ -65,14 +65,6 @@ type Message =
     | Query of Query
     | QueryResponse of Tweet array
     | Subscribe of Subscribe
-    // | StartRequestPhase // Nodes start making 1 request per second
-    // | Join of string // route the Join packet
-    // | JoinSuccess // parent know that a node has finished joining
-    // | NewRow of int * string[] //  (row number, row of routing table)
-    // | NewLeaves of Set<string> // leaf set
-    // | Route of string * string * int // route the Route(request) packet
-    // | RouteSuccess of int // report number of hops to parent
-    // | RequestTick // tick every 1 second
 
 // main program
 let main () =
