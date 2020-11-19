@@ -38,11 +38,18 @@ type Tweet = {
     by: User
 }
 
+type Query = {
+    qType: string
+    qName: string
+    by: User
+}
+
 // different message types
 type Message =
     | Start of string // parent starts spawning nodes. Nodes start joining
     | Register of User
     | Tweet of Tweet
+    | Query of Query
     // | StartRequestPhase // Nodes start making 1 request per second
     // | Join of string // route the Join packet
     // | JoinSuccess // parent know that a node has finished joining
@@ -127,8 +134,8 @@ let main numNodes =
 
                                 // Tweet
                                 let tweet = {id=getRandomString 5; text=getRandomTweet(); by=user} 
-                                clientRef <! Tweet tweet                           
-
+                                clientRef <! Tweet tweet 
+                                clientRef <! Tweet tweet                         
                         | _ -> return ()
                         return! parentLoop()
                     }

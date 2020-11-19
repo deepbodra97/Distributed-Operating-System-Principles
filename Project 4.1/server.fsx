@@ -40,11 +40,18 @@ type Tweet = {
     by: User
 }
 
+type Query = {
+    qType: string
+    qName: string
+    by: User
+}
+
 // different message types
 type Message =
     | Start of string // parent starts spawning nodes. Nodes start joining
     | Register of User
     | Tweet of Tweet
+    | Query of Query
     // | StartRequestPhase // Nodes start making 1 request per second
     // | Join of string // route the Join packet
     // | JoinSuccess // parent know that a node has finished joining
@@ -75,10 +82,10 @@ let main () =
             <| fun mailbox ->
                 let id = mailbox.Self.Path.Name // id
 
-                let mutable usersMap = Map.empty
-                let mutable tweetsByUsername = Map.empty
-                let mutable tweetsByHashTag = Map.empty
-                let mutable tweetsByMention = Map.empty
+                let mutable usersMap: Map<string, User> = Map.empty
+                let mutable tweetsByUsername: Map<string, Tweet array> = Map.empty
+                let mutable tweetsByHashTag: Map<string, string array> = Map.empty
+                let mutable tweetsByMention: Map<string, string array> = Map.empty
 
                 let rec loop() =
                     actor {   
@@ -89,19 +96,38 @@ let main () =
                             usersMap <- usersMap.Add(user.username, user)
                             printfn "User %A registered" user
                         | Tweet tweet ->
-                            tweetsByUsername <- tweetsByUsername.Add(tweet.by.username, tweet)
+                            let mutable tweets =
+                                if tweetsByUsername.ContainsKey(tweet.by.username) then tweetsByUsername.Item(tweet.by.username)
+                                else [||]
+                            tweets <- Array.append tweets [|tweet|]
+                            tweetsByUsername <- tweetsByUsername.Add(tweet.by.username, tweets)
 
                             let hashTags = getPatternMatches regexHashTag tweet.text
                             let mentions = getPatternMatches regexMention tweet.text
-
+                            
                             for tag in hashTags do
-                                tweetsByHashTag <- tweetsByHashTag.Add(tag, tweet.id)
+                                let mutable tweetIds =
+                                    if tweetsByHashTag.ContainsKey(tag) then tweetsByHashTag.Item(tag)
+                                    else [||]
+                                tweetIds <- Array.append tweetIds [|tweet.id|]
+                                tweetsByHashTag <- tweetsByHashTag.Add(tag, tweetIds)
                             
                             for mention in mentions do
-                                tweetsByMention <- tweetsByMention.Add(mention, tweet.id)
+                                let mutable tweetIds =
+                                    if tweetsByMention.ContainsKey(tweet.id) then tweetsByMention.Item(tweet.id)
+                                    else [||]
+                                tweetIds <- Array.append tweetIds [|tweet.id|]
+                                tweetsByMention <- tweetsByMention.Add(mention, tweetIds)
 
                             printfn "%A %A %A" tweetsByUsername tweetsByHashTag tweetsByMention
-
+                            printfn "New Tweet %A" tweet
+                        // | Query query ->
+                            // let mutable response = Array.empty
+                            // match query.qType with
+                            // | "subscription" ->
+                                
+                            // | "hashtag" ->
+                            // | "mention" ->
                         | _ -> return ()
                         return! loop()
                     }
