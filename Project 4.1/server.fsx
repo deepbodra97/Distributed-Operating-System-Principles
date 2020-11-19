@@ -58,6 +58,8 @@ type Subscribe = {
 type Message =
     | Start of string // parent starts spawning nodes. Nodes start joining
     | Register of User
+    | Login of User
+    | Logout of User
     | Tweet of Tweet
     | Query of Query
     | QueryResponse of Tweet array
@@ -92,6 +94,7 @@ let main () =
             <| fun mailbox ->
                 let id = mailbox.Self.Path.Name // id
 
+                let mutable onlineUsers: Set<string> = Set.empty
                 let mutable usersMap: Map<string, User> = Map.empty
                 let mutable subscriptionsMap: Map<string, string array> = Map.empty // subscriptions of a given user
                 let mutable subscribersMap: Map<string, string array> = Map.empty // subscribers of a given user
@@ -107,7 +110,14 @@ let main () =
                         match msg with
                         | Register user ->
                             usersMap <- usersMap.Add(user.username, user)
+                            onlineUsers <- onlineUsers.Add(user.username)
                             printfn "User %A registered" user
+                        | Login user ->
+                            onlineUsers <- onlineUsers.Add(user.username)
+                            printfn "User %A logged in" user
+                        | Logout user ->
+                            onlineUsers <- onlineUsers.Remove(user.username)
+                            printfn "User %A logged out" user
                         | Tweet tweet ->
                             let newTweet = if tweet.tType = "tweet" then tweet else {tweet with text=tweetsMap.Item(tweet.reId).text}
                             tweetsMap <- tweetsMap.Add(newTweet.id, newTweet)

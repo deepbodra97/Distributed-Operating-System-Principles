@@ -55,6 +55,8 @@ type Subscribe = {
 type Message =
     | Start of string // parent starts spawning nodes. Nodes start joining
     | Register of User
+    | Login of User
+    | Logout of User
     | Tweet of Tweet
     | Query of Query
     | QueryResponse of Tweet array
