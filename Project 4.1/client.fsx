@@ -50,6 +50,7 @@ type Message =
     | Register of User
     | Tweet of Tweet
     | Query of Query
+    | QueryResponse of Tweet array
     // | StartRequestPhase // Nodes start making 1 request per second
     // | Join of string // route the Join packet
     // | JoinSuccess // parent know that a node has finished joining
@@ -107,6 +108,12 @@ let main numNodes =
                     mServer <! Register mUser
                 | Tweet tweet ->
                     mServer <! Tweet tweet
+                | Query query ->
+                    mServer <! Query query
+                | QueryResponse response ->
+                    printfn "Respone"
+                    for tweet in response do
+                        printfn "%A" tweet
                 | _ -> return ()
                 return! clientLoop()
             }
@@ -133,9 +140,13 @@ let main numNodes =
                                 clientRef <! Register user
 
                                 // Tweet
-                                let tweet = {id=getRandomString 5; text=getRandomTweet(); by=user} 
-                                clientRef <! Tweet tweet 
-                                clientRef <! Tweet tweet                         
+                                let tweet = {id=getRandomString 5; text="def #abc"; by=user} 
+                                clientRef <! Tweet tweet
+                                clientRef <! Tweet tweet
+
+                                // Query
+                                let query = {qType="hashtag"; qName="#abc"; by=user}
+                                clientRef <! Query query                               
                         | _ -> return ()
                         return! parentLoop()
                     }

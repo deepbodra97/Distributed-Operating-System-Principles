@@ -52,6 +52,7 @@ type Message =
     | Register of User
     | Tweet of Tweet
     | Query of Query
+    | QueryResponse of Tweet array
     // | StartRequestPhase // Nodes start making 1 request per second
     // | Join of string // route the Join packet
     // | JoinSuccess // parent know that a node has finished joining
@@ -70,7 +71,7 @@ let main () =
 
     let (|Regex|_|) pattern input =
         let matches = Regex.Matches(input, pattern)
-        Some([ for m in matches -> m.Value.[1..]])
+        Some([ for m in matches -> m.Value])
     
     let getPatternMatches regex tweet =
         match tweet with
@@ -83,7 +84,8 @@ let main () =
                 let id = mailbox.Self.Path.Name // id
 
                 let mutable usersMap: Map<string, User> = Map.empty
-                let mutable tweetsByUsername: Map<string, Tweet array> = Map.empty
+                let mutable tweetsMap: Map<string, Tweet> = Map.empty
+                let mutable tweetsByUsername: Map<string, string array> = Map.empty
                 let mutable tweetsByHashTag: Map<string, string array> = Map.empty
                 let mutable tweetsByMention: Map<string, string array> = Map.empty
 
@@ -96,11 +98,14 @@ let main () =
                             usersMap <- usersMap.Add(user.username, user)
                             printfn "User %A registered" user
                         | Tweet tweet ->
-                            let mutable tweets =
+                            
+                            tweetsMap <- tweetsMap.Add(tweet.id, tweet)
+
+                            let mutable tweetIds =
                                 if tweetsByUsername.ContainsKey(tweet.by.username) then tweetsByUsername.Item(tweet.by.username)
                                 else [||]
-                            tweets <- Array.append tweets [|tweet|]
-                            tweetsByUsername <- tweetsByUsername.Add(tweet.by.username, tweets)
+                            tweetIds <- Array.append tweetIds [|tweet.id|]
+                            tweetsByUsername <- tweetsByUsername.Add(tweet.by.username, tweetIds)
 
                             let hashTags = getPatternMatches regexHashTag tweet.text
                             let mentions = getPatternMatches regexMention tweet.text
@@ -121,13 +126,16 @@ let main () =
 
                             printfn "%A %A %A" tweetsByUsername tweetsByHashTag tweetsByMention
                             printfn "New Tweet %A" tweet
-                        // | Query query ->
-                            // let mutable response = Array.empty
-                            // match query.qType with
+                        | Query query ->
+                            let mutable response = Array.empty
+                            match query.qType with
                             // | "subscription" ->
                                 
-                            // | "hashtag" ->
+                            | "hashtag" ->
+                                for tweetId in tweetsByHashTag.Item(query.qName) do
+                                    response <- Array.append response [|tweetsMap.Item(tweetId)|]
                             // | "mention" ->
+                            sender <! QueryResponse response
                         | _ -> return ()
                         return! loop()
                     }
