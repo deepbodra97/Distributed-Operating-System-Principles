@@ -46,6 +46,11 @@ type Query = {
     by: User
 }
 
+type Subscribe = {
+    publisher: string
+    subscriber: string
+}
+
 // different message types
 type Message =
     | Start of string // parent starts spawning nodes. Nodes start joining
@@ -53,6 +58,7 @@ type Message =
     | Tweet of Tweet
     | Query of Query
     | QueryResponse of Tweet array
+    | Subscribe of Subscribe
     // | StartRequestPhase // Nodes start making 1 request per second
     // | Join of string // route the Join packet
     // | JoinSuccess // parent know that a node has finished joining
@@ -84,6 +90,8 @@ let main () =
                 let id = mailbox.Self.Path.Name // id
 
                 let mutable usersMap: Map<string, User> = Map.empty
+                let mutable subscriptionsMap: Map<string, string array> = Map.empty // subscriptions of a given user
+                let mutable subscribersMap: Map<string, string array> = Map.empty // subscribers of a given user
                 let mutable tweetsMap: Map<string, Tweet> = Map.empty
                 let mutable tweetsByUsername: Map<string, string array> = Map.empty
                 let mutable tweetsByHashTag: Map<string, string array> = Map.empty
@@ -101,9 +109,7 @@ let main () =
                             
                             tweetsMap <- tweetsMap.Add(tweet.id, tweet)
 
-                            let mutable tweetIds =
-                                if tweetsByUsername.ContainsKey(tweet.by.username) then tweetsByUsername.Item(tweet.by.username)
-                                else [||]
+                            let mutable tweetIds = if tweetsByUsername.ContainsKey(tweet.by.username) then tweetsByUsername.Item(tweet.by.username) else [||]
                             tweetIds <- Array.append tweetIds [|tweet.id|]
                             tweetsByUsername <- tweetsByUsername.Add(tweet.by.username, tweetIds)
 
@@ -111,32 +117,43 @@ let main () =
                             let mentions = getPatternMatches regexMention tweet.text
                             
                             for tag in hashTags do
-                                let mutable tweetIds =
-                                    if tweetsByHashTag.ContainsKey(tag) then tweetsByHashTag.Item(tag)
-                                    else [||]
+                                let mutable tweetIds = if tweetsByHashTag.ContainsKey(tag) then tweetsByHashTag.Item(tag) else [||]
                                 tweetIds <- Array.append tweetIds [|tweet.id|]
                                 tweetsByHashTag <- tweetsByHashTag.Add(tag, tweetIds)
                             
                             for mention in mentions do
-                                let mutable tweetIds =
-                                    if tweetsByMention.ContainsKey(mention) then tweetsByMention.Item(mention)
-                                    else [||]
+                                let mutable tweetIds = if tweetsByMention.ContainsKey(mention) then tweetsByMention.Item(mention) else [||]
                                 tweetIds <- Array.append tweetIds [|tweet.id|]
                                 tweetsByMention <- tweetsByMention.Add(mention, tweetIds)
-
                             printfn "%A %A %A" tweetsByUsername tweetsByHashTag tweetsByMention
                             printfn "New Tweet %A" tweet
+                        | Subscribe subscribe ->
+                            let mutable subscriptions = if subscriptionsMap.ContainsKey(subscribe.subscriber) then subscriptionsMap.Item(subscribe.subscriber) else [||]
+                            subscriptions <- Array.append subscriptions [|subscribe.publisher|]
+                            subscriptions <- Array.append subscriptions [|subscribe.publisher|]
+                            subscriptionsMap <- subscriptionsMap.Add(subscribe.subscriber, subscriptions)
+
+                            let mutable subscribers = if subscribersMap.ContainsKey(subscribe.publisher) then subscribersMap.Item(subscribe.publisher) else [||]
+                            subscribers <- Array.append subscribers [|subscribe.subscriber|]
+                            subscribers <- Array.append subscribers [|subscribe.subscriber|]
+                            subscribersMap <- subscribersMap.Add(subscribe.publisher, subscribers)
+                            printfn "%s subscribed to %s" subscribe.subscriber subscribe.publisher
                         | Query query ->
-                            let mutable response = Array.empty
+                            let mutable response: Tweet array = Array.empty
                             match query.qType with
-                            // | "subscription" ->
-                                
+                            | "subscription" ->
+                                let subscriptions = if subscriptionsMap.ContainsKey(query.by.username) then subscriptionsMap.Item(query.by.username) else [||]
+                                for publisher in subscriptions do
+                                    let tweetIds = if tweetsByUsername.ContainsKey(publisher) then tweetsByUsername.Item(publisher) else [||]
+                                    for tweetId in tweetIds do
+                                        response <- Array.append response [|tweetsMap.Item(tweetId)|]
                             | "hashtag" ->
                                 for tweetId in tweetsByHashTag.Item(query.qName) do
                                     response <- Array.append response [|tweetsMap.Item(tweetId)|]
                             | "mention" ->
                                 for tweetId in tweetsByMention.Item(query.qName) do
                                     response <- Array.append response [|tweetsMap.Item(tweetId)|]
+                            | _ -> printfn "Invalid Query Type"
                             sender <! QueryResponse response
                         | _ -> return ()
                         return! loop()

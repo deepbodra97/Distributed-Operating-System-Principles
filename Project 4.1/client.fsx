@@ -44,6 +44,11 @@ type Query = {
     by: User
 }
 
+type Subscribe = {
+    publisher: string
+    subscriber: string
+}
+
 // different message types
 type Message =
     | Start of string // parent starts spawning nodes. Nodes start joining
@@ -51,6 +56,7 @@ type Message =
     | Tweet of Tweet
     | Query of Query
     | QueryResponse of Tweet array
+    | Subscribe of Subscribe 
     // | StartRequestPhase // Nodes start making 1 request per second
     // | Join of string // route the Join packet
     // | JoinSuccess // parent know that a node has finished joining
