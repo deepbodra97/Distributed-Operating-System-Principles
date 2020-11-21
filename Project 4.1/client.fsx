@@ -6,6 +6,8 @@ open Akka.FSharp
 open Akka.Configuration
 open Akka.Serialization
 
+open System
+
 let configuration = 
     ConfigurationFactory.ParseString(
         @"akka {
@@ -68,6 +70,16 @@ type Message =
 // main program
 let main numNodes =
     let system = ActorSystem.Create("ClientSimulator", configuration) // create an actor system
+
+    // User Behaviour Parameters
+    let behaviorPercentPublisher = [|5; 15; 80|] // [disconnect, query, tweet]
+    let tickRangePublisher = [|5000; 10000|]
+
+    let behaviorPercentReader = [|5; 80; 15|]
+    let tickRangeReader = [|5000; 10000|]
+
+    let behaviorPercentLazy = [|30; 35; 35|]
+    let tickRangeLazy = [|10000; 15000|]
 
     let mutable usernames = Array.empty
     let mutable zipfConstant = 0.0
@@ -169,21 +181,51 @@ let main numNodes =
                     for tweet in response do
                         printfn "%A" tweet
                 | Tick ->
-                    printfn "tick"
+                    let rnd = getRandomInt 1 100
                     match mBehavior with
+                    
                     | "publisher" ->
-                        let rnd = getRandomInt 1 100
                         let self = system.ActorSelection("/user/parent/"+mId)
                         if mActive then
-                            if rnd <= 5 then // logout with p=0.05
+                            if rnd <= behaviorPercentPublisher.[0] then // logout with p=0.05
                                 mLogout ()
-                            elif rnd <= 20 then // query with p=0.15
+                            elif rnd <= (behaviorPercentPublisher.[1]-behaviorPercentPublisher.[0]) then // query with p=0.15
                                 mQuery ()
                             else // post with p=0.8
                                 mTweet ()  
                         else // if logged out
-                            if rnd <= 95 then // login with p=0.95
+                            if rnd <= (1-behaviorPercentPublisher.[0]) then // login with p=0.95
                                 mLogin ()
+                        let nextTickTime = getRandomInt tickRangePublisher.[0] tickRangePublisher.[1] |> float
+                        system.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.Zero, (TimeSpan.FromMilliseconds(nextTickTime)), childMailbox.Self, (Tick), childMailbox.Self) |> ignore
+                    | "reader" ->
+                        let self = system.ActorSelection("/user/parent/"+mId)
+                        if mActive then
+                            if rnd <= behaviorPercentReader.[0] then // logout with p=0.05
+                                mLogout ()
+                            elif rnd <= (behaviorPercentReader.[1]-behaviorPercentReader.[0]) then // query with p=0.80
+                                mQuery ()
+                            else // post with p=0.8
+                                mTweet ()  
+                        else // if logged out
+                            if rnd <= (1-behaviorPercentReader.[0]) then // login with p=0.15
+                                mLogin ()
+                        let nextTickTime = getRandomInt tickRangeReader.[0] tickRangeReader.[1] |> float
+                        system.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.Zero, (TimeSpan.FromMilliseconds(nextTickTime)), childMailbox.Self, (Tick), childMailbox.Self) |> ignore
+                    | "lazy" ->
+                        let self = system.ActorSelection("/user/parent/"+mId)
+                        if mActive then
+                            if rnd <= behaviorPercentLazy.[0] then // logout with p=0.30
+                                mLogout ()
+                            elif rnd <= (behaviorPercentLazy.[1]-behaviorPercentLazy.[0]) then // query with p=0.35
+                                mQuery ()
+                            else // post with p=0.8
+                                mTweet ()  
+                        else // if logged out
+                            if rnd <= (1-behaviorPercentLazy.[0]) then // login with p=0.35
+                                mLogin ()
+                        let nextTickTime = getRandomInt tickRangeLazy.[0] tickRangeLazy.[1] |> float
+                        system.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.Zero, (TimeSpan.FromMilliseconds(nextTickTime)), childMailbox.Self, (Tick), childMailbox.Self) |> ignore
                     | _ -> return ()
                     mSelf <! Tick
 
