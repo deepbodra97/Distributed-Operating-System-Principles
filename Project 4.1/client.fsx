@@ -41,7 +41,7 @@ type Tweet = {
 }
 
 type Query = {
-    qType: string
+    qType: string // subscription | hashtag | mention
     qName: string
     by: User
 }
@@ -63,6 +63,7 @@ type Message =
     | Query of Query
     | QueryResponse of Tweet array
     | Subscribe of Subscribe
+    | Tick
 
 // main program
 let main numNodes =
@@ -70,6 +71,8 @@ let main numNodes =
 
     let mutable usernames = Array.empty
     let mutable zipfConstant = 0.0
+
+    let queryTypes = [|"subscription"; "hashtag"; "mention"|]
 
     let getRandomInt start stop =  // get random integer [start, stop]
         let rnd = System.Random()
@@ -81,20 +84,28 @@ let main numNodes =
         let sz = Array.length chars in
         System.String(Array.init n (fun _ -> chars.[rnd.Next sz]))
 
-    let getRandomTweet () =
-        let getRandomMention () = 
+    let getRandomHashTag () = 
+            if (getRandomInt 0 1) = 0 then
+                "#" + getRandomString (getRandomInt 3 4)
+            else
+                ""
+    
+    let getRandomMention () = 
             if (getRandomInt 0 1) = 0 then
                 "@" + usernames.[(getRandomInt 0 (usernames.Length-1))]
             else
                 ""
-    
-        let getRandomHashTag () = 
-            if (getRandomInt 0 1) = 0 then
-                "#" + getRandomString (getRandomInt 3 10)
-            else
-                ""
+
+    let getRandomTweet () =
         let tweet = (getRandomString(getRandomInt 10 20)) + getRandomMention () + getRandomHashTag ()
         tweet
+
+    let getRandomQuery user () =
+        let qType = queryTypes.[(getRandomInt 0 (queryTypes.Length-1))]
+        match qType with
+        | "subscription" -> Query{qType=qType; qName=""; by=user}
+        | "hashtag" -> Query{qType=qType; qName=(getRandomHashTag ()); by=user}
+        | "mention" -> Query{qType=qType; qName=(getRandomMention ()); by=user}
 
     let client (childMailbox: Actor<_>) = // client node
         let mId = childMailbox.Self.Path.Name // id
@@ -103,6 +114,28 @@ let main numNodes =
 
         let mutable mUser = Unchecked.defaultof<User>
         let mutable mBehavior = ""
+        let mutable mActive = true
+        let mSelf = system.ActorSelection("/user/parent/"+mId)
+
+        let mLogin () =
+            printfn "%s logging in" mId
+            mSelf <! Login mUser
+
+        let mLogout () =
+            printfn "%s logging out" mId
+            mSelf <! Logout mUser
+
+        let mQuery () =
+            printfn "%s querying" mId
+            mSelf <! getRandomQuery mUser
+
+        let mTweet () =
+            printfn "%s tweeting" mId
+            if (getRandomInt 0 1) = 0 then
+                mSelf <! Tweet {id=getRandomString 5; reId=""; text=getRandomTweet (); tType="tweet"; by=mUser} 
+            else
+                mSelf <! Tweet {id=getRandomString 5; reId=getRandomString 5; text=""; tType="retweet"; by=mUser}
+
 
         let rec clientLoop() =
             actor {   
@@ -122,6 +155,7 @@ let main numNodes =
                 | Subscribe s ->
                     let numToSubscribe = int(zipfConstant*float(numNodes)/float(mUser.id))
                     for i in 1 .. numToSubscribe do
+                        printfn "%s subscribing" mId
                         let subscribe = {s with publisher=usernames.[(getRandomInt 0 (usernames.Length-1))]; subscriber=mUser.username}
                         mServer <! Subscribe subscribe
                 | Tweet tweet ->
@@ -134,6 +168,25 @@ let main numNodes =
                     printfn "Respone"
                     for tweet in response do
                         printfn "%A" tweet
+                | Tick ->
+                    printfn "tick"
+                    match mBehavior with
+                    | "publisher" ->
+                        let rnd = getRandomInt 1 100
+                        let self = system.ActorSelection("/user/parent/"+mId)
+                        if mActive then
+                            if rnd <= 5 then // logout with p=0.05
+                                mLogout ()
+                            elif rnd <= 20 then // query with p=0.15
+                                mQuery ()
+                            else // post with p=0.8
+                                mTweet ()  
+                        else // if logged out
+                            if rnd <= 95 then // login with p=0.95
+                                mLogin ()
+                    | _ -> return ()
+                    mSelf <! Tick
+
                 | _ -> return ()
                 return! clientLoop()
             }
@@ -164,10 +217,6 @@ let main numNodes =
                                 usernames <- Array.append usernames [|username|]
                                 let user = {id=string i; username=username; password=password}
                                 clientRef <! Register user
-                                
-                                // Subscribe
-                                let subscribe = {publisher=""; subscriber=""}
-                                clientRef <! Subscribe subscribe
 
                                 if i <= lazyPercent*numNodes/100 then
                                     clientRef <! UserBehavior "lazy"
@@ -175,21 +224,25 @@ let main numNodes =
                                     clientRef <! UserBehavior "publisher"
                                 else
                                     clientRef <! UserBehavior "reader"
+                            
+                            // Subscribe                            
+                            let subscribe = {publisher=""; subscriber=""}
+                            system.ActorSelection("/user/parent/*") <! Subscribe subscribe
+                            system.ActorSelection("/user/parent/*") <! Tick
+                            // Tweet
+                            // let tweet = {id="1"; reId=""; text="def #abc @ghi"; tType="tweet"; by=user} 
+                            // clientRef <! Tweet tweet
+                            // clientRef <! Tweet tweet
 
-                                // Tweet
-                                // let tweet = {id="1"; reId=""; text="def #abc @ghi"; tType="tweet"; by=user} 
-                                // clientRef <! Tweet tweet
-                                // clientRef <! Tweet tweet
+                            
+                            // Query
+                            // let query = {qType="mention"; qName="@ghi"; by=user}
+                            // clientRef <! Query query      
 
-                                
-                                // Query
-                                // let query = {qType="mention"; qName="@ghi"; by=user}
-                                // clientRef <! Query query      
-
-                                // Retweet
-                                // let retweet = {id=getRandomString 5; reId="1"; text=""; tType="retweet"; by=user} 
-                                // clientRef <! Tweet retweet
-                                // clientRef <! Tweet retweet                 
+                            // Retweet
+                            // let retweet = {id=getRandomString 5; reId="1"; text=""; tType="retweet"; by=user} 
+                            // clientRef <! Tweet retweet
+                            // clientRef <! Tweet retweet                 
                         | _ -> return ()
                         return! parentLoop()
                     }

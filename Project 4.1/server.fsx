@@ -60,11 +60,13 @@ type Message =
     | Register of User
     | Login of User
     | Logout of User
+    | UserBehavior of string
     | Tweet of Tweet
     | LiveTweet of Tweet // not used for server
     | Query of Query
     | QueryResponse of Tweet array
     | Subscribe of Subscribe
+    | Tick // not used for server
 
 // main program
 let main () =
@@ -97,6 +99,33 @@ let main () =
                 let mutable tweetsByHashTag: Map<string, string array> = Map.empty
                 let mutable tweetsByMention: Map<string, string array> = Map.empty
 
+                let addTweet tweet =
+                    tweetsMap <- tweetsMap.Add(tweet.id, tweet)
+                    let mutable tweetIds = if tweetsByUsername.ContainsKey(tweet.by.username) then tweetsByUsername.Item(tweet.by.username) else [||]
+                    tweetIds <- Array.append tweetIds [|tweet.id|]
+                    tweetsByUsername <- tweetsByUsername.Add(tweet.by.username, tweetIds)
+
+                    let hashTags = getPatternMatches regexHashTag tweet.text
+                    let mentions = getPatternMatches regexMention tweet.text
+                    
+                    for tag in hashTags do
+                        let mutable tweetIds = if tweetsByHashTag.ContainsKey(tag) then tweetsByHashTag.Item(tag) else [||]
+                        tweetIds <- Array.append tweetIds [|tweet.id|]
+                        tweetsByHashTag <- tweetsByHashTag.Add(tag, tweetIds)
+                    
+                    for mention in mentions do
+                        let mutable tweetIds = if tweetsByMention.ContainsKey(mention) then tweetsByMention.Item(mention) else [||]
+                        tweetIds <- Array.append tweetIds [|tweet.id|]
+                        tweetsByMention <- tweetsByMention.Add(mention, tweetIds)
+                
+                let pushTweet (tweet: Tweet) =
+                    // Send tweets to online users
+                    if subscribersMap.ContainsKey(tweet.by.username) then
+                        for subscriber in subscribersMap.Item(tweet.by.username) do
+                            if onlineUsers.Contains(subscriber) then
+                                system.ActorSelection(clientSimulatorAddress+usersMap.Item(subscriber).id) <! LiveTweet tweet
+                                printfn "Tweet sent to online user %s" subscriber
+
                 let rec loop() =
                     actor {   
                         let! (msg: Message) = mailbox.Receive() // fetch the message from the queue
@@ -114,32 +143,14 @@ let main () =
                             printfn "User %A logged out" user
                         | Tweet tweet ->
                             printfn "New Tweet %A" tweet
-                            let newTweet = if tweet.tType = "tweet" then tweet else {tweet with text=tweetsMap.Item(tweet.reId).text}
-                            tweetsMap <- tweetsMap.Add(newTweet.id, newTweet)
-
-                            let mutable tweetIds = if tweetsByUsername.ContainsKey(tweet.by.username) then tweetsByUsername.Item(newTweet.by.username) else [||]
-                            tweetIds <- Array.append tweetIds [|newTweet.id|]
-                            tweetsByUsername <- tweetsByUsername.Add(newTweet.by.username, tweetIds)
-
-                            let hashTags = getPatternMatches regexHashTag newTweet.text
-                            let mentions = getPatternMatches regexMention newTweet.text
-                            
-                            for tag in hashTags do
-                                let mutable tweetIds = if tweetsByHashTag.ContainsKey(tag) then tweetsByHashTag.Item(tag) else [||]
-                                tweetIds <- Array.append tweetIds [|newTweet.id|]
-                                tweetsByHashTag <- tweetsByHashTag.Add(tag, tweetIds)
-                            
-                            for mention in mentions do
-                                let mutable tweetIds = if tweetsByMention.ContainsKey(mention) then tweetsByMention.Item(mention) else [||]
-                                tweetIds <- Array.append tweetIds [|newTweet.id|]
-                                tweetsByMention <- tweetsByMention.Add(mention, tweetIds)
-                            
-                            // Send tweets to online users
-                            if subscribersMap.ContainsKey(newTweet.by.username) then
-                                for subscriber in subscribersMap.Item(newTweet.by.username) do
-                                    if onlineUsers.Contains(subscriber) then
-                                        system.ActorSelection(clientSimulatorAddress+usersMap.Item(subscriber).id) <! LiveTweet newTweet
-                                        printfn "Tweet sent to online user %s" subscriber
+                            if tweet.tType = "tweet" then
+                                addTweet tweet
+                                pushTweet tweet
+                            else // retweet
+                                if tweetsMap.ContainsKey(tweet.reId) then
+                                    let retweet = {tweet with text=tweetsMap.Item(tweet.reId).text}
+                                    addTweet retweet
+                                    pushTweet retweet
                             printfn "%A %A %A" tweetsByUsername tweetsByHashTag tweetsByMention
                             
                         | Subscribe subscribe ->
@@ -154,6 +165,7 @@ let main () =
                             subscribersMap <- subscribersMap.Add(subscribe.publisher, subscribers)
                             printfn "%s subscribed to %s" subscribe.subscriber subscribe.publisher
                         | Query query ->
+                            printfn "Query from %s" query.by.username
                             let mutable response: Tweet array = Array.empty
                             match query.qType with
                             | "subscription" ->
