@@ -66,6 +66,7 @@ type Message =
     | QueryResponse of Tweet array
     | Subscribe of Subscribe
     | Tick
+    | PrintStats // not used for client
 
 // main program
 let main numNodes =
@@ -80,6 +81,8 @@ let main numNodes =
 
     let behaviorPercentLazy = [|30; 35; 35|]
     let tickRangeLazy = [|10000; 15000|]
+
+    let maxLenTweetId = 3
 
     let mutable usernames = Array.empty
     let mutable zipfConstant = 0.0
@@ -109,7 +112,7 @@ let main numNodes =
                 ""
 
     let getRandomTweet () =
-        let tweet = (getRandomString(getRandomInt 10 20)) + getRandomMention () + getRandomHashTag ()
+        let tweet = (getRandomString(getRandomInt 10 20)) + " " + getRandomMention ()+ " " + getRandomHashTag ()
         tweet
 
     let getRandomQuery user () =
@@ -131,10 +134,12 @@ let main numNodes =
 
         let mLogin () =
             printfn "%s logging in" mId
+            mActive <- true
             mSelf <! Login mUser
 
         let mLogout () =
             printfn "%s logging out" mId
+            mActive <- false
             mSelf <! Logout mUser
 
         let mQuery () =
@@ -144,9 +149,9 @@ let main numNodes =
         let mTweet () =
             printfn "%s tweeting" mId
             if (getRandomInt 0 1) = 0 then
-                mSelf <! Tweet {id=getRandomString 5; reId=""; text=getRandomTweet (); tType="tweet"; by=mUser} 
+                mSelf <! Tweet {id=getRandomString maxLenTweetId; reId=""; text=getRandomTweet (); tType="tweet"; by=mUser} 
             else
-                mSelf <! Tweet {id=getRandomString 5; reId=getRandomString 5; text=""; tType="retweet"; by=mUser}
+                mSelf <! Tweet {id=getRandomString maxLenTweetId; reId=getRandomString maxLenTweetId; text=""; tType="retweet"; by=mUser}
 
 
         let rec clientLoop() =
@@ -194,7 +199,7 @@ let main numNodes =
                             else // post with p=0.8
                                 mTweet ()  
                         else // if logged out
-                            if rnd <= (1-behaviorPercentPublisher.[0]) then // login with p=0.95
+                            if rnd <= (100-behaviorPercentPublisher.[0]) then // login with p=0.95
                                 mLogin ()
                         let nextTickTime = getRandomInt tickRangePublisher.[0] tickRangePublisher.[1] |> float
                         system.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.Zero, (TimeSpan.FromMilliseconds(nextTickTime)), childMailbox.Self, (Tick), childMailbox.Self) |> ignore
@@ -208,7 +213,7 @@ let main numNodes =
                             else // post with p=0.8
                                 mTweet ()  
                         else // if logged out
-                            if rnd <= (1-behaviorPercentReader.[0]) then // login with p=0.15
+                            if rnd <= (100-behaviorPercentReader.[0]) then // login with p=0.15
                                 mLogin ()
                         let nextTickTime = getRandomInt tickRangeReader.[0] tickRangeReader.[1] |> float
                         system.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.Zero, (TimeSpan.FromMilliseconds(nextTickTime)), childMailbox.Self, (Tick), childMailbox.Self) |> ignore
@@ -219,10 +224,10 @@ let main numNodes =
                                 mLogout ()
                             elif rnd <= (behaviorPercentLazy.[1]-behaviorPercentLazy.[0]) then // query with p=0.35
                                 mQuery ()
-                            else // post with p=0.8
+                            else // post with p=0.35
                                 mTweet ()  
                         else // if logged out
-                            if rnd <= (1-behaviorPercentLazy.[0]) then // login with p=0.35
+                            if rnd <= (100-behaviorPercentLazy.[0]) then // login with p=0.70
                                 mLogin ()
                         let nextTickTime = getRandomInt tickRangeLazy.[0] tickRangeLazy.[1] |> float
                         system.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.Zero, (TimeSpan.FromMilliseconds(nextTickTime)), childMailbox.Self, (Tick), childMailbox.Self) |> ignore
@@ -270,21 +275,7 @@ let main numNodes =
                             // Subscribe                            
                             let subscribe = {publisher=""; subscriber=""}
                             system.ActorSelection("/user/parent/*") <! Subscribe subscribe
-                            system.ActorSelection("/user/parent/*") <! Tick
-                            // Tweet
-                            // let tweet = {id="1"; reId=""; text="def #abc @ghi"; tType="tweet"; by=user} 
-                            // clientRef <! Tweet tweet
-                            // clientRef <! Tweet tweet
-
-                            
-                            // Query
-                            // let query = {qType="mention"; qName="@ghi"; by=user}
-                            // clientRef <! Query query      
-
-                            // Retweet
-                            // let retweet = {id=getRandomString 5; reId="1"; text=""; tType="retweet"; by=user} 
-                            // clientRef <! Tweet retweet
-                            // clientRef <! Tweet retweet                 
+                            system.ActorSelection("/user/parent/*") <! Tick              
                         | _ -> return ()
                         return! parentLoop()
                     }
