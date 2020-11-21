@@ -57,6 +57,7 @@ type Message =
     | Register of User
     | Login of User
     | Logout of User
+    | UserBehavior of string
     | Tweet of Tweet
     | LiveTweet of Tweet
     | Query of Query
@@ -101,6 +102,7 @@ let main numNodes =
         let mServer = system.ActorSelection("akka.tcp://twitter@127.0.0.1:9001/user/server")
 
         let mutable mUser = Unchecked.defaultof<User>
+        let mutable mBehavior = ""
 
         let rec clientLoop() =
             actor {   
@@ -110,6 +112,13 @@ let main numNodes =
                 | Register user -> // register is of type User
                     mUser <- user
                     mServer <! Register mUser
+                | Login user ->
+                    mServer <! Login user
+                | Logout user ->
+                    mServer <! Logout user
+                | UserBehavior behavior ->
+                    mBehavior <- behavior
+                    printfn "%s %s" mId mBehavior
                 | Subscribe s ->
                     let numToSubscribe = int(zipfConstant*float(numNodes)/float(mUser.id))
                     for i in 1 .. numToSubscribe do
@@ -135,6 +144,10 @@ let main numNodes =
             <| fun parentMailbox ->
                 let mutable mainSender = Unchecked.defaultof<IActorRef> // main program
 
+                let lazyPercent = 80
+                let agressivePublisherPercent = 10
+                let agressiveReaderPercent = 10
+
                 let rec parentLoop() =
                     actor {
                         let! (msg: Message) = parentMailbox.Receive() // fetch the message from the queue
@@ -151,16 +164,24 @@ let main numNodes =
                                 usernames <- Array.append usernames [|username|]
                                 let user = {id=string i; username=username; password=password}
                                 clientRef <! Register user
+                                
+                                // Subscribe
+                                let subscribe = {publisher=""; subscriber=""}
+                                clientRef <! Subscribe subscribe
+
+                                if i <= lazyPercent*numNodes/100 then
+                                    clientRef <! UserBehavior "lazy"
+                                elif i <= (lazyPercent+agressivePublisherPercent)*numNodes/100 then
+                                    clientRef <! UserBehavior "publisher"
+                                else
+                                    clientRef <! UserBehavior "reader"
 
                                 // Tweet
                                 // let tweet = {id="1"; reId=""; text="def #abc @ghi"; tType="tweet"; by=user} 
                                 // clientRef <! Tweet tweet
                                 // clientRef <! Tweet tweet
 
-                                // Subscribe to self for testing
-                                let subscribe = {publisher=""; subscriber=""}
-                                clientRef <! Subscribe subscribe
-
+                                
                                 // Query
                                 // let query = {qType="mention"; qName="@ghi"; by=user}
                                 // clientRef <! Query query      
@@ -168,7 +189,7 @@ let main numNodes =
                                 // Retweet
                                 // let retweet = {id=getRandomString 5; reId="1"; text=""; tType="retweet"; by=user} 
                                 // clientRef <! Tweet retweet
-                                // clientRef <! Tweet retweet                      
+                                // clientRef <! Tweet retweet                 
                         | _ -> return ()
                         return! parentLoop()
                     }
