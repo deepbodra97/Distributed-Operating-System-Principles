@@ -133,24 +133,26 @@ let main numNodes =
         let mSelf = system.ActorSelection("/user/parent/"+mId)
 
         let mLogin () =
-            printfn "%s logging in" mId
+            printfn "User %s is logging in" mUser.username
             mActive <- true
             mSelf <! Login mUser
 
         let mLogout () =
-            printfn "%s logging out" mId
+            printfn "User %s is logging out" mUser.username
             mActive <- false
             mSelf <! Logout mUser
 
         let mQuery () =
-            printfn "%s querying" mId
+            printfn "User %s is querying" mUser.username
             mSelf <! getRandomQuery mUser
 
         let mTweet () =
-            printfn "%s tweeting" mId
             if (getRandomInt 0 1) = 0 then
-                mSelf <! Tweet {id=getRandomString maxLenTweetId; reId=""; text=getRandomTweet (); tType="tweet"; by=mUser} 
+                let tweetText = getRandomTweet ()
+                printfn "User %s is tweeting: %s" mUser.username tweetText
+                mSelf <! Tweet {id=getRandomString maxLenTweetId; reId=""; text=tweetText; tType="tweet"; by=mUser} 
             else
+                printfn "User %s is retweeting" mUser.username
                 mSelf <! Tweet {id=getRandomString maxLenTweetId; reId=getRandomString maxLenTweetId; text=""; tType="retweet"; by=mUser}
 
 
@@ -168,27 +170,26 @@ let main numNodes =
                     mServer <! Logout user
                 | UserBehavior behavior ->
                     mBehavior <- behavior
-                    printfn "%s %s" mId mBehavior
+                    printfn "User %s is %s" mUser.username mBehavior
                 | Subscribe s ->
                     let numToSubscribe = int(zipfConstant*float(numNodes)/float(mUser.id))
                     for i in 1 .. numToSubscribe do
-                        printfn "%s subscribing" mId
-                        let subscribe = {s with publisher=usernames.[(getRandomInt 0 (usernames.Length-1))]; subscriber=mUser.username}
+                        let publisher = usernames.[(getRandomInt 0 (usernames.Length-1))]
+                        // printfn "User %s is subscribing to %s" mUser.username publisher
+                        let subscribe = {s with publisher=publisher; subscriber=mUser.username}
                         mServer <! Subscribe subscribe
                 | Tweet tweet ->
                     mServer <! Tweet tweet
                 | LiveTweet tweet ->
-                    printfn "%s received live tweet %s" mId tweet.text
+                    printfn "User %s received live tweet: %s" mUser.id tweet.text
                 | Query query ->
                     mServer <! Query query
                 | QueryResponse response ->
-                    printfn "Respone"
                     for tweet in response do
-                        printfn "%A" tweet
+                        printfn "User %s received response: %s" mUser.username tweet.text
                 | Tick ->
                     let rnd = getRandomInt 1 100
                     match mBehavior with
-                    
                     | "publisher" ->
                         let self = system.ActorSelection("/user/parent/"+mId)
                         if mActive then
@@ -254,7 +255,6 @@ let main numNodes =
                         let sender = parentMailbox.Sender()
                         match msg with
                         | Start start ->
-                            printfn "parent received start"
                             for i in 1 .. numNodes do
                                 zipfConstant <- zipfConstant + 1.0/float(i)
 
