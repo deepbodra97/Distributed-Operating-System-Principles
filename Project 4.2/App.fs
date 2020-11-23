@@ -17,6 +17,11 @@ module Model =
         password: string
     }
 
+    type Subscribe = {
+        publisher: string
+        subscriber: string
+    }
+
     type Tweet = {
         id: string
         reId: string
@@ -46,6 +51,8 @@ module Model =
         /// Accepts GET requests to /usersMap/{id}
         | [<EndPoint "GET /users">]
             GetUser of username: string
+        | [<EndPoint "POST /users/subscribe"; Json "Subscribe">]
+            SubscribeTo of Subscribe: Subscribe
 
         /// Accepts PUT requests to /usersMap with User as JSON body
         // | [<EndPoint "PUT /usersMap"; Json "User">]
@@ -113,6 +120,8 @@ module Backend =
     let private tweetsByUsername = new Dictionary<string, List<string>>() // username -> tweetId
     let private tweetsByHashTag = new Dictionary<string, List<string>>() // hashtag -> tweetId
     let private tweetsByMention = new Dictionary<string, List<string>>() // mention -> tweetId
+    let private subscriptionsMap = new Dictionary<string, HashSet<string>>() // subscriptions of a given user
+    let private subscribersMap = new Dictionary<string,  List<string>>()
 
     let maxLenTweetId = 3
     /// The highest id used so far, incremented each time a person is POSTed.
@@ -123,6 +132,9 @@ module Backend =
     
     let userAlreadyExists() : ApiResult<'T> =
         Error (Http.Status.NotFound, { error = "User already exists" })
+    
+    let userAlreadySubscribed() : ApiResult<'T> =
+        Error (Http.Status.NotFound, { error = "User already subscribed" })
 
     // let GetPeople () : ApiResult<User[]> =
     //     lock usersMap <| fun () ->
@@ -148,6 +160,19 @@ module Backend =
             match usersMap.TryGetValue(username) with
             | true, user -> Ok user
             | false, _ -> userNotFound()
+    
+    let SubscribeTo (subscribe: Subscribe) : ApiResult<Id> =
+        if not (subscriptionsMap.ContainsKey(subscribe.subscriber)) then    
+            lock subscriptionsMap <| fun () ->    
+                let subscriptions = subscriptionsMap.GetValueOrDefault(subscribe.subscriber, new HashSet<string>())
+                subscriptions.Add(subscribe.publisher) |> ignore
+                subscriptionsMap.[subscribe.subscriber] <- subscriptions
+            lock subscribersMap <| fun () ->
+                let subscribers = subscribersMap.GetValueOrDefault(subscribe.publisher, new List<string>())
+                subscribers.Add(subscribe.subscriber)
+                subscribersMap.[subscribe.publisher] <- subscribers
+            Ok {id="200"}
+        else userAlreadySubscribed()
 
     //  For Tweets
     let addTweet (tweet: Tweet) = // add this tweet to the database
@@ -269,6 +294,8 @@ module Site =
             // JsonContent (Backend.GetUser username)
         | CreateUser user ->
             JsonContent (Backend.CreateUser user)
+        | SubscribeTo subscribe ->
+            JsonContent (Backend.SubscribeTo subscribe)
         // | EditPerson User ->
             // JsonContent (Backend.EditPerson User)
         // | DeletePerson id ->
