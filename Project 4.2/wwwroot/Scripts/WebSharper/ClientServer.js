@@ -1,36 +1,43 @@
 (function()
 {
  "use strict";
- var Global,ClientServer,Client,WebSharper,UI,Var$1,Submitter,View,Remoting,AjaxRemotingProvider,Concurrency,Doc,AttrProxy;
+ var Global,ClientServer,Client,Tweet,SC$1,WebSharper,UI,View,Var$1,Doc,AttrProxy,Client$1,Templates;
  Global=self;
  ClientServer=Global.ClientServer=Global.ClientServer||{};
  Client=ClientServer.Client=ClientServer.Client||{};
+ Tweet=Client.Tweet=Client.Tweet||{};
+ SC$1=Global.StartupCode$ClientServer$Client=Global.StartupCode$ClientServer$Client||{};
  WebSharper=Global.WebSharper;
  UI=WebSharper&&WebSharper.UI;
- Var$1=UI&&UI.Var$1;
- Submitter=UI&&UI.Submitter;
  View=UI&&UI.View;
- Remoting=WebSharper&&WebSharper.Remoting;
- AjaxRemotingProvider=Remoting&&Remoting.AjaxRemotingProvider;
- Concurrency=WebSharper&&WebSharper.Concurrency;
+ Var$1=UI&&UI.Var$1;
  Doc=UI&&UI.Doc;
  AttrProxy=UI&&UI.AttrProxy;
+ Client$1=UI&&UI.Client;
+ Templates=Client$1&&Client$1.Templates;
+ Tweet.New=function(id,reId,text,tType,by)
+ {
+  return{
+   id:id,
+   reId:reId,
+   text:text,
+   tType:tType,
+   by:by
+  };
+ };
  Client.Main=function()
  {
-  var rvInput,submit,vReversed;
-  rvInput=Var$1.Create$1("");
-  submit=Submitter.CreateOption(rvInput.get_View());
-  vReversed=View.MapAsync(function(a)
-  {
-   var b;
-   return a!=null&&a.$==1?(new AjaxRemotingProvider.New()).Async("ClientServer:ClientServer.Server.DoSomething:-420592154",[a.$0]):(b=null,Concurrency.Delay(function()
-   {
-    return Concurrency.Return("");
-   }));
-  },submit.view);
-  return Doc.Element("div",[],[Doc.Input([],rvInput),Doc.Button("Send",[],function()
-  {
-   submit.Trigger();
-  }),Doc.Element("hr",[],[]),Doc.Element("h4",[AttrProxy.Create("class","text-muted")],[Doc.TextNode("The server responded:")]),Doc.Element("div",[AttrProxy.Create("class","jumbotron")],[Doc.Element("h1",[],[Doc.TextView(vReversed)])])]);
+  SC$1.$cctor();
+  return SC$1.Main;
+ };
+ Client.op_LessMultiplyGreater=function(f,x)
+ {
+  return View.Apply(f,x);
+ };
+ SC$1.$cctor=function()
+ {
+  var varUsername,inputUsername;
+  SC$1.$cctor=Global.ignore;
+  SC$1.Main=(varUsername=Var$1.Create$1("username"),(inputUsername=Doc.Input([AttrProxy.Create("name","username")],varUsername),(Templates.LoadLocalTemplates(""),Doc.RunById("main",inputUsername))));
  };
 }());
