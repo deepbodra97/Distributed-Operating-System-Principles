@@ -219,7 +219,9 @@ module Backend =
         let response = new List<Tweet>()
         match query.qType with
         | "subscription" -> // get tweets from subscription
-            ()
+            for publisher in subscriptionsMap.GetValueOrDefault(query.by, new HashSet<string>()) do
+                for tweetId in tweetsByUsername.GetValueOrDefault(publisher, new List<string>()) do
+                    response.Add(tweetsMap.[tweetId])
         | "hashtag" -> // get tweets with this hash tag
             let tag = "#" + query.qName
             for tweetId in tweetsByHashTag.GetValueOrDefault(tag, new List<string>()) do
