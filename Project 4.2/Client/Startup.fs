@@ -10,6 +10,7 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open WebSharper.AspNetCore
 
+
 type Startup() =
 
     member this.ConfigureServices(services: IServiceCollection) =
@@ -32,6 +33,7 @@ module Program =
         WebHost
             .CreateDefaultBuilder(args)
             .UseStartup<Startup>()
+            .UseUrls("https://localhost:8081", "http://localhost:8080")
             .Build()
             .Run()
         0
