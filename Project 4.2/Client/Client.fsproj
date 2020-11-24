@@ -16,5 +16,6 @@
     <PackageReference Include="WebSharper.UI" Version="4.6.3.219" />
     <PackageReference Include="WebSharper.AspNetCore" Version="4.6.2.136" />
   </ItemGroup>
+  <!-- <Import Project="..\Server\ClientServer.fsproj" /> -->
 
 </Project>
