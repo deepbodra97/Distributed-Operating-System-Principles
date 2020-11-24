@@ -44,7 +44,7 @@ module Client =
 
     type IndexTemplate = Template<"wwwroot/index.html", ClientLoad.FromDocument>
 
-    let Ajax (method: string) (url: string) (serializedData: Tweet) : Async<string> =
+    let Ajax (method: string) (url: string) (serializedData: string) : Async<string> =
             Async.FromContinuations <| fun (ok, ko, _) ->
             JQuery.Ajax (    
                 AjaxSettings(
@@ -85,7 +85,7 @@ module Client =
         let postTweetToServer (tweet: Tweet) =
             printfn "Sending tweet to server"
             async {
-                let! response = Ajax "POST" "http://localhost:5000/api/tweets" tweet
+                let! response = Ajax "POST" "http://localhost:5000/api/tweets" (Json.Serialize tweet)
                 return Json.Deserialize response
             } |> Async.Start
 

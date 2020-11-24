@@ -495,7 +495,7 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    }));
    Concurrency.Start((b$1=null,Concurrency.Delay(function()
    {
-    return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/tweets",tweet),function(a$1)
+    return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/tweets",JSON.stringify(((Provider.Id())())(tweet))),function(a$1)
     {
      Provider.Id();
      JSON.parse(a$1);
