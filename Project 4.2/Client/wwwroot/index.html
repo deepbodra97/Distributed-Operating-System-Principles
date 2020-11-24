@@ -7,20 +7,34 @@
     <link rel="stylesheet" type="text/css" href="Content/Client.css" />
     <style>
         /* Don't show the not-yet-loaded templates */
-        [ws-template], [ws-children-template] { display: none; }
+        /* [ws-template], [ws-children-template] { display: none; } */
     </style>
     <script type="text/javascript" src="Content/Client.head.js"></script>
 </head>
 <body>
     <h1>My list of unique people</h1>
     <div id="main" ws-children-template="Main">
-        <ul ws-hole="ListContainer">
-            <li ws-template="ListItem">${Name}</li>
-        </ul>
         <div>
-            <input ws-var="Name" placeholder="Name" />
-            <button ws-onclick="Add">Add</button>
-            <div>You are about to add: ${Name}</div>
+            <input ws-var="RegUsername" type="text" placeholder="Username" />
+            <input ws-var="RegPassword" type="password" placeholder="Password" />
+            <input ws-var="RegConfirmPassword" placeholder="Password" />
+            <button ws-onclick="Register">Register</button>
+        </div>
+        <div>
+            <input ws-var="LogUsername" type="text" placeholder="Username" />
+            <input ws-var="LogPassword" type="password" placeholder="Password" />
+            <button ws-onclick="Login">Login</button>
+        </div>
+        <div>
+            <input ws-var="TweetText" placeholder="Name" />
+            <button ws-onclick="OnTweet">Tweet</button>
+            <!-- <div>You are about to add: ${Name}</div> -->
+        </div>
+        <div>
+            <h2>Tweets</h2>   
+            <ul ws-hole="ListContainer">
+                <li ws-template="ListItem">${Id}|${Text}</li>
+            </ul>
         </div>
     </div>
     <script type="text/javascript" src="Content/Client.min.js"></script>
