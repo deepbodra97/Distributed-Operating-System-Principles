@@ -54,11 +54,9 @@ module Client =
                     DataType = DataType.Text,
                     Data = serializedData,
                     Success = (fun result _  _ -> ok (result :?> string)),
-                    Error = (fun jqXHR _ _ -> ko (System.Exception("Error")))
+                    Error = (fun jqXHR _ _ -> ko (System.Exception(jqXHR.ResponseText)))
                 )
-            )
-                // JQuery.Ajax(ajaxSetting)
-                |> ignore
+            ) |> ignore
 
     // let PostBlogArticle (article: Tweet) : Async<int> =
     //     async { let! response = Ajax "POST" "http://localhost:5000/api/tweets" article
@@ -72,17 +70,24 @@ module Client =
 
     [<SPAEntryPoint>]
     let Main () =
-        printfn "MAIN"
-        
-        let newTweetTextInput = Var.Create ""
-        
+      
+      
+        // User
+        // Register
+        let registerUser (user: User) =
+            printfn "Sending registration request to server"
+            async {
+                let! response = Ajax "POST" "http://localhost:5000/api/users" (Json.Serialize user)
+                return Json.Deserialize response
+            } |> Async.Start
+
         let tweets : ListModel<string, Tweet> = 
             ListModel.Create (fun tweet -> tweet.id) []
         
         let addTweet (tweet: Tweet) =
             tweets.Add(tweet)
         
-        let postTweetToServer (tweet: Tweet) =
+        let postTweet (tweet: Tweet) =
             printfn "Sending tweet to server"
             async {
                 let! response = Ajax "POST" "http://localhost:5000/api/tweets" (Json.Serialize tweet)
@@ -91,8 +96,13 @@ module Client =
 
         // let newTweet = {id=""; reId=""; text="client"; tType="tweet"; by="deep"}
         IndexTemplate.Main()
-            .Register(fun t->
-                JS.Alert(t.Vars.RegUsername.Value+t.Vars.RegPassword.Value+t.Vars.RegConfirmPassword.Value)
+            .OnRegister(fun t->
+                let newUser = {id=0; username=t.Vars.RegUsername.Value; password=t.Vars.RegPassword.Value}
+                registerUser newUser
+                t.Vars.RegUsername.Value <- ""
+                t.Vars.RegPassword.Value <- ""
+                t.Vars.RegConfirmPassword.Value <- ""
+                // JS.Alert(++t.Vars.RegConfirmPassword.Value)
             )
             .Login(fun t->
                 JS.Alert(t.Vars.LogUsername.Value+t.Vars.LogPassword.Value)
@@ -103,12 +113,11 @@ module Client =
                 )
             )
             // .TweetText(newTweet)
-            .OnTweet(fun newTweetText ->
+            .OnTweet(fun t ->
                 // tweets.Add({newTweet with id=newName.Value})
                 // addTweet {newTweet with id=newName.Value}
-                let newTweet = {id=""; reId=""; text=newTweetTextInput.Value; tType="tweet"; by="Deep"}
-                postTweetToServer newTweet
-                newTweetTextInput.Value <- ""
+                let newTweet = {id=""; reId=""; text=t.Vars.TweetText.Value; tType="tweet"; by="Deep"}
+                postTweet newTweet
             )
             .Doc()
         |> Doc.RunById "main"
