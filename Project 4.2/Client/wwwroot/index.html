@@ -15,12 +15,14 @@
     <h1>TWITTER</h1>
     <div id="main" ws-children-template="Main">
         <div>
+            <div ws-hole="InfoRegister">${Info}</div>
             <input ws-var="RegUsername" type="text" placeholder="Username" />
             <input ws-var="RegPassword" type="password" placeholder="Password" />
             <input ws-var="RegConfirmPassword" type="password" placeholder="Password" />
             <button ws-onclick="OnRegister">Register</button>
         </div>
         <div>
+            <div ws-hole="Info">${Info}</div>
             <input ws-var="LogUsername" type="text" placeholder="Username" />
             <input ws-var="LogPassword" type="password" placeholder="Password" />
             <button ws-onclick="OnLogin">Login</button>

@@ -34,6 +34,9 @@ module Model =
         qName: string
         by: string
     }
+
+    type Id = { id : string }
+    type Error = { error : string }
 open Model
 
 
@@ -72,17 +75,20 @@ module Client =
     let Main () =
 
         let mutable mUser = Unchecked.defaultof<User>
-      
+
+        let InfoRegisterText = Var.Create ""
+        let InfoLoginText = Var.Create ""
+
         // User
         // Register
-        let registerUser (user: User) =
-            printfn "Sending registration request to server"
+        let registerUser (user: User): Id Async =
+            printfn "Sending registration request to server"    
             async {
                 let! response = Ajax "POST" "http://localhost:5000/api/users" (Json.Serialize user)
                 mUser <- user
-                return Json.Deserialize response
-            } |> Async.Start
-
+                return Json.Deserialize<Id> response
+            }
+            
         // Login
         let loginUser (user: User) =
             printfn "Sending login request to server"
@@ -123,12 +129,24 @@ module Client =
 
         // let newTweet = {id=""; reId=""; text="client"; tType="tweet"; by="deep"}
         IndexTemplate.Main()
+            .InfoRegister(
+                View.Map id InfoRegisterText.View
+            )
             .OnRegister(fun t->
                 let newUser = {id=0; username=t.Vars.RegUsername.Value; password=t.Vars.RegPassword.Value}
-                registerUser newUser
+                async {
+                    try    
+                        let! response = registerUser newUser
+                        InfoRegisterText.Value <- "Success"
+                        printfn "response=%A" response
+                    with error ->
+                        printfn "Exception Caught: %s" error.Message
+                        InfoRegisterText.Value <- "Failure"                        
+                }  |> Async.Start
                 t.Vars.RegUsername.Value <- ""
                 t.Vars.RegPassword.Value <- ""
                 t.Vars.RegConfirmPassword.Value <- ""
+                
                 // JS.Alert(++t.Vars.RegConfirmPassword.Value)
             )
             .OnLogin(fun t->
@@ -157,7 +175,7 @@ module Client =
                         {qType="mention"; qName=qName; by=mUser.username}
                 async {
                     let! response = searchTweets newQuery
-                    response |> List.iter (fun tweet -> tweets.Add tweet)
+                    response |> List.iter tweets.Add
                 }  |> Async.Start
             )
             .QueryResults(
