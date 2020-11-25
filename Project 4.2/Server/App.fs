@@ -44,6 +44,9 @@ module Model =
         | [<EndPoint "POST /users"; Json "User">]
             CreateUser of User: User
 
+        | [<EndPoint "POST /users/login"; Json "User">]
+            LoginUser of User: User
+
         /// Accepts GET requests to /usersMap
         // | [<EndPoint "GET /usersMap">]
             // GetPeople
@@ -128,10 +131,13 @@ module Backend =
     // let private lastId = ref 0
 
     let userNotFound() : ApiResult<'T> =
-        Error (Http.Status.NotFound, { error = "User not found." })
+        Error (Http.Status.NotFound, { error = "Please register first" })
     
     let userAlreadyExists() : ApiResult<'T> =
         Error (Http.Status.NotFound, { error = "User already exists" })
+    
+    let wrongPassword() : ApiResult<'Ts> =
+        Error (Http.Status.NotFound, { error = "Seems like you forgot your password or someone hacked your account ;)" })
     
     let userAlreadySubscribed() : ApiResult<'T> =
         Error (Http.Status.NotFound, { error = "User already subscribed" })
@@ -154,6 +160,17 @@ module Backend =
             | false, _ ->
                 usersMap.[data.username] <- data
                 Ok { id =  data.username}
+    
+    let LoginUser (data: User) : ApiResult<Id> =
+        lock usersMap <| fun () ->
+            match usersMap.TryGetValue(data.username) with
+            | true, user ->
+                if user.password = data.password then
+                    Ok { id =  data.username}
+                else
+                    wrongPassword()
+            | false, _ ->
+                userNotFound()
 
     let GetUser (username: string) : ApiResult<User> =
         lock usersMap <| fun () ->
@@ -200,6 +217,7 @@ module Backend =
 
     let CreateTweet (data: Tweet) : ApiResult<Id> =
         // incr lastId
+        printfn "create tweet called"
         let tweetId = getRandomString maxLenTweetId
         match data.tType with
         | "tweet" -> // if new tweet
@@ -223,11 +241,11 @@ module Backend =
                 for tweetId in tweetsByUsername.GetValueOrDefault(publisher, new List<string>()) do
                     response.Add(tweetsMap.[tweetId])
         | "hashtag" -> // get tweets with this hash tag
-            let tag = "#" + query.qName
+            let tag = query.qName
             for tweetId in tweetsByHashTag.GetValueOrDefault(tag, new List<string>()) do
                 response.Add(tweetsMap.[tweetId])
         | "mention" -> // //  get tweets with this mention
-            let mention = "@" + query.qName
+            let mention = query.qName
             for tweetId in tweetsByMention.GetValueOrDefault(mention, new List<string>()) do
                 response.Add(tweetsMap.[tweetId])
         response.ToArray () |> Ok
@@ -251,24 +269,24 @@ module Backend =
     //         | false, _ -> personNotFound()
 
     // On application startup, pre-fill the database with a few usersMap.
-    do List.iter (CreateUser >> ignore) [
-        { id = 0
-          username = "Alonzo"
-          password = "Church"
-        }
-        { id = 0
-          username = "Alan"
-          password = "Turing"
-        }
-        { id = 0
-          username = "Bertrand"
-          password = "Russell"
-        }
-        { id = 0
-          username = "Noam"
-          password = "Chomsky"
-        }
-    ]
+    // do List.iter (CreateUser >> ignore) [
+    //     { id = 0
+    //       username = "Alonzo"
+    //       password = "Church"
+    //     }
+    //     { id = 0
+    //       username = "Alan"
+    //       password = "Turing"
+    //     }
+    //     { id = 0
+    //       username = "Bertrand"
+    //       password = "Russell"
+    //     }
+    //     { id = 0
+    //       username = "Noam"
+    //       password = "Chomsky"
+    //     }
+    // ]
 
 /// The server side website, tying everything together.
 module Site =
@@ -296,6 +314,8 @@ module Site =
             // JsonContent (Backend.GetUser username)
         | CreateUser user ->
             JsonContent (Backend.CreateUser user)
+        | LoginUser user ->
+            JsonContent (Backend.LoginUser user)
         | SubscribeTo subscribe ->
             JsonContent (Backend.SubscribeTo subscribe)
         // | EditPerson User ->

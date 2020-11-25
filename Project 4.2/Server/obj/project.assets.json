@@ -4207,11 +4207,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Workspace\\F#\\Distributed-Operating-System\\Project 4.2\\ClientServer.fsproj",
+      "projectUniqueName": "D:\\Workspace\\F#\\Distributed-Operating-System\\Project 4.2\\Server\\ClientServer.fsproj",
       "projectName": "ClientServer",
-      "projectPath": "D:\\Workspace\\F#\\Distributed-Operating-System\\Project 4.2\\ClientServer.fsproj",
+      "projectPath": "D:\\Workspace\\F#\\Distributed-Operating-System\\Project 4.2\\Server\\ClientServer.fsproj",
       "packagesPath": "C:\\Users\\Deepb\\.nuget\\packages\\",
-      "outputPath": "D:\\Workspace\\F#\\Distributed-Operating-System\\Project 4.2\\obj\\",
+      "outputPath": "D:\\Workspace\\F#\\Distributed-Operating-System\\Project 4.2\\Server\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Deepb\\AppData\\Roaming\\NuGet\\NuGet.Config"
