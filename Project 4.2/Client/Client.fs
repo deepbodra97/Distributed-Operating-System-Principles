@@ -142,7 +142,7 @@ module Client =
             .OnTweet(fun t ->
                 // tweets.Add({newTweet with id=newName.Value})
                 // addTweet {newTweet with id=newName.Value}
-                let newTweet = {id=""; reId=""; text=t.Vars.TweetText.Value; tType="tweet"; by="Deep"}
+                let newTweet = {id=""; reId=""; text=t.Vars.TweetText.Value; tType="tweet"; by=mUser.username}
                 postTweet newTweet
             )
             .OnSearch(fun t ->

@@ -629,7 +629,7 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
     reId:"",
     text:t$5.Vars.Hole("tweettext").$1.Get(),
     tType:"tweet",
-    by:"Deep"
+    by:mUser.username
    });
   })),t$1)),(t.h.push(Handler.EventQ2(t.k,"onsearch",function()
   {
