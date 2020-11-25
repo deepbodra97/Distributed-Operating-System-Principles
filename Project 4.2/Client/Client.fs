@@ -70,7 +70,8 @@ module Client =
 
     [<SPAEntryPoint>]
     let Main () =
-      
+
+        let mutable mUser = Unchecked.defaultof<User>
       
         // User
         // Register
@@ -78,6 +79,25 @@ module Client =
             printfn "Sending registration request to server"
             async {
                 let! response = Ajax "POST" "http://localhost:5000/api/users" (Json.Serialize user)
+                mUser <- user
+                return Json.Deserialize response
+            } |> Async.Start
+
+        // Login
+        let loginUser (user: User) =
+            printfn "Sending login request to server"
+            mUser <- user
+            // async {
+            //     let! response = Ajax "POST" "http://localhost:5000/api/users" (Json.Serialize user)
+            //     mUser <- user
+            //     return Json.Deserialize response
+            // } |> Async.Start
+
+        // Subscribe
+        let subscribeTo (subscribe: Subscribe) =
+            printfn "Sending subscription request to server"
+            async {
+                let! response = Ajax "POST" "http://localhost:5000/api/users/subscribe" (Json.Serialize subscribe)
                 return Json.Deserialize response
             } |> Async.Start
 
@@ -94,6 +114,13 @@ module Client =
                 return Json.Deserialize response
             } |> Async.Start
 
+        let searchTweets (query: QueryTweet): Tweet list Async =
+            printfn "Sending query to server"
+            async {
+                let! response = Ajax "POST" "http://localhost:5000/api/tweets/search" (Json.Serialize query)
+                return Json.Deserialize<Tweet list> response
+            }
+
         // let newTweet = {id=""; reId=""; text="client"; tType="tweet"; by="deep"}
         IndexTemplate.Main()
             .OnRegister(fun t->
@@ -104,20 +131,41 @@ module Client =
                 t.Vars.RegConfirmPassword.Value <- ""
                 // JS.Alert(++t.Vars.RegConfirmPassword.Value)
             )
-            .Login(fun t->
-                JS.Alert(t.Vars.LogUsername.Value+t.Vars.LogPassword.Value)
+            .OnLogin(fun t->
+                let user = {id=0; username=t.Vars.LogUsername.Value; password=t.Vars.LogPassword.Value}
+                loginUser user
             )
-            .ListContainer(
-                tweets.View.DocSeqCached(fun (tweet: Tweet) ->
-                    IndexTemplate.ListItem().Id(tweet.id).Text(tweet.text).Doc()
-                )
+            .OnSubscribe(fun t->
+                let newSubscribe = {publisher=t.Vars.Publisher.Value; subscriber=mUser.username}
+                subscribeTo newSubscribe
             )
-            // .TweetText(newTweet)
             .OnTweet(fun t ->
                 // tweets.Add({newTweet with id=newName.Value})
                 // addTweet {newTweet with id=newName.Value}
                 let newTweet = {id=""; reId=""; text=t.Vars.TweetText.Value; tType="tweet"; by="Deep"}
                 postTweet newTweet
             )
+            .OnSearch(fun t ->
+                tweets.Clear()
+                let qName = t.Vars.QueryName.Value
+                let newQuery =
+                    if qName = "" then
+                        {qType="subscription"; qName=qName; by=mUser.username}
+                    else if qName.StartsWith("#") then
+                        {qType="hashtag"; qName=qName; by=mUser.username}
+                    else
+                        {qType="mention"; qName=qName; by=mUser.username}
+                async {
+                    let! response = searchTweets newQuery
+                    response |> List.iter (fun tweet -> tweets.Add tweet)
+                }  |> Async.Start
+            )
+            .QueryResults(
+                tweets.View.DocSeqCached(fun (tweet: Tweet) ->
+                    IndexTemplate.Tweet().Text(tweet.text).Doc()
+                )
+            )
+            // .TweetText(newTweet)
+            
             .Doc()
         |> Doc.RunById "main"

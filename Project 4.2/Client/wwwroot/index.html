@@ -23,7 +23,11 @@
         <div>
             <input ws-var="LogUsername" type="text" placeholder="Username" />
             <input ws-var="LogPassword" type="password" placeholder="Password" />
-            <button ws-onclick="Login">Login</button>
+            <button ws-onclick="OnLogin">Login</button>
+        </div>
+        <div>
+            <input ws-var="Publisher" type="text" placeholder="username to subscribe to" />
+            <button ws-onclick="OnSubscribe">Subscribe</button>
         </div>
         <div>
             <input ws-var="TweetText" placeholder="Name" />
@@ -31,9 +35,11 @@
             <!-- <div>You are about to add: ${Name}</div> -->
         </div>
         <div>
-            <h2>Tweets</h2>   
-            <ul ws-hole="ListContainer">
-                <li ws-template="ListItem">${Id}|${Text}</li>
+            <h2>Query</h2>
+            <input ws-var="QueryName" placeholder="Query" />
+            <button ws-onclick="OnSearch">Search</button>
+            <ul ws-hole="QueryResults">
+                <li ws-template="Tweet">${Text}</li>
             </ul>
         </div>
     </div>

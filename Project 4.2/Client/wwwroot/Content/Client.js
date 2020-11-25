@@ -367,11 +367,12 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
 (function()
 {
  "use strict";
- var Global,Client,Client$1,WebSharper,UI,ListModel,List,T,Obj,Operators,Templating,Runtime,Server,TemplateInstance,Arrays,ProviderBuilder,Handler,Var,JavaScript,JS,Unchecked,Client_Templates,ClientSideJson,Provider,Storage,Seq,System,Guid,Collections,List$1,Dictionary,Client$2,Templates,Doc,Pervasives,Concurrency,ArrayStorage,View,Snap,Object,AttrProxy,CheckedInput,Numeric,HashSet,TemplateInitializer,Var$1,EventTarget,Node,AsyncBody,CT,Enumerator,DictionaryUtil,T$1,ConcreteVar,SC$1,WindowOrWorkerGlobalScope,Docs,Scheduler,SC$2,DocElemNode,CharacterData,Abbrev,Fresh,Elt,Prepare,Slice,DomUtility,KeyCollection,An,Settings,Mailbox,Error,OperationCanceledException,CancellationTokenSource,Attrs,Dyn,Array,Attrs$1,AttrModule,Strings,Updates,ValueCollection,Docs$1,RunState,NodeSet,Anims,SC$3,HashSetUtil,SC$4,BindVar,SC$5,SC$6,AppendList,SC$7,DynamicAttrNode,Easing,HashSet$1,String,DomNodes,Queue,Char,Lazy,SC$8,LazyExtensionsProxy,LazyRecord,console,JSON,$,IntelliFactory,Runtime$1,Math,Date;
+ var Global,Client,Client$1,WebSharper,Unchecked,UI,ListModel,List,T,Obj,Operators,Templating,Runtime,Server,TemplateInstance,Arrays,ProviderBuilder,Handler,Var,Client_Templates,ClientSideJson,Provider,Storage,Seq,System,Guid,Collections,List$1,Dictionary,JavaScript,Pervasives,Concurrency,Strings,Client$2,Templates,Doc,ArrayStorage,View,Snap,Object,AttrProxy,CheckedInput,Numeric,AsyncBody,SC$1,CT,HashSet,TemplateInitializer,Var$1,EventTarget,Node,JS,Enumerator,DictionaryUtil,Scheduler,CancellationTokenSource,T$1,ConcreteVar,SC$2,WindowOrWorkerGlobalScope,Docs,DocElemNode,CharacterData,Error,OperationCanceledException,Abbrev,Fresh,Elt,Prepare,Slice,DomUtility,KeyCollection,An,Settings,Mailbox,Attrs,Dyn,Array,Attrs$1,AttrModule,Updates,ValueCollection,Docs$1,RunState,NodeSet,Anims,SC$3,HashSetUtil,SC$4,BindVar,SC$5,SC$6,AppendList,SC$7,DynamicAttrNode,Easing,HashSet$1,String,DomNodes,Queue,Char,Lazy,SC$8,LazyExtensionsProxy,LazyRecord,console,JSON,$,IntelliFactory,Runtime$1,Math,Date;
  Global=self;
  Client=Global.Client=Global.Client||{};
  Client$1=Client.Client=Client.Client||{};
  WebSharper=Global.WebSharper=Global.WebSharper||{};
+ Unchecked=WebSharper.Unchecked=WebSharper.Unchecked||{};
  UI=WebSharper.UI=WebSharper.UI||{};
  ListModel=UI.ListModel=UI.ListModel||{};
  List=WebSharper.List=WebSharper.List||{};
@@ -386,9 +387,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  ProviderBuilder=Server.ProviderBuilder=Server.ProviderBuilder||{};
  Handler=Server.Handler=Server.Handler||{};
  Var=UI.Var=UI.Var||{};
- JavaScript=WebSharper.JavaScript=WebSharper.JavaScript||{};
- JS=JavaScript.JS=JavaScript.JS||{};
- Unchecked=WebSharper.Unchecked=WebSharper.Unchecked||{};
  Client_Templates=Global.Client_Templates=Global.Client_Templates||{};
  ClientSideJson=WebSharper.ClientSideJson=WebSharper.ClientSideJson||{};
  Provider=ClientSideJson.Provider=ClientSideJson.Provider||{};
@@ -399,11 +397,13 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  Collections=WebSharper.Collections=WebSharper.Collections||{};
  List$1=Collections.List=Collections.List||{};
  Dictionary=Collections.Dictionary=Collections.Dictionary||{};
+ JavaScript=WebSharper.JavaScript=WebSharper.JavaScript||{};
+ Pervasives=JavaScript.Pervasives=JavaScript.Pervasives||{};
+ Concurrency=WebSharper.Concurrency=WebSharper.Concurrency||{};
+ Strings=WebSharper.Strings=WebSharper.Strings||{};
  Client$2=UI.Client=UI.Client||{};
  Templates=Client$2.Templates=Client$2.Templates||{};
  Doc=UI.Doc=UI.Doc||{};
- Pervasives=JavaScript.Pervasives=JavaScript.Pervasives||{};
- Concurrency=WebSharper.Concurrency=WebSharper.Concurrency||{};
  ArrayStorage=Storage.ArrayStorage=Storage.ArrayStorage||{};
  View=UI.View=UI.View||{};
  Snap=UI.Snap=UI.Snap||{};
@@ -411,24 +411,28 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  AttrProxy=UI.AttrProxy=UI.AttrProxy||{};
  CheckedInput=UI.CheckedInput=UI.CheckedInput||{};
  Numeric=WebSharper.Numeric=WebSharper.Numeric||{};
+ AsyncBody=Concurrency.AsyncBody=Concurrency.AsyncBody||{};
+ SC$1=Global.StartupCode$WebSharper_Main$Concurrency=Global.StartupCode$WebSharper_Main$Concurrency||{};
+ CT=Concurrency.CT=Concurrency.CT||{};
  HashSet=Collections.HashSet=Collections.HashSet||{};
  TemplateInitializer=Server.TemplateInitializer=Server.TemplateInitializer||{};
  Var$1=UI.Var$1=UI.Var$1||{};
  EventTarget=Global.EventTarget;
  Node=Global.Node;
- AsyncBody=Concurrency.AsyncBody=Concurrency.AsyncBody||{};
- CT=Concurrency.CT=Concurrency.CT||{};
+ JS=JavaScript.JS=JavaScript.JS||{};
  Enumerator=WebSharper.Enumerator=WebSharper.Enumerator||{};
  DictionaryUtil=Collections.DictionaryUtil=Collections.DictionaryUtil||{};
+ Scheduler=Concurrency.Scheduler=Concurrency.Scheduler||{};
+ CancellationTokenSource=WebSharper.CancellationTokenSource=WebSharper.CancellationTokenSource||{};
  T$1=Enumerator.T=Enumerator.T||{};
  ConcreteVar=UI.ConcreteVar=UI.ConcreteVar||{};
- SC$1=Global.StartupCode$WebSharper_UI$Templates=Global.StartupCode$WebSharper_UI$Templates||{};
+ SC$2=Global.StartupCode$WebSharper_UI$Templates=Global.StartupCode$WebSharper_UI$Templates||{};
  WindowOrWorkerGlobalScope=Global.WindowOrWorkerGlobalScope;
  Docs=UI.Docs=UI.Docs||{};
- Scheduler=Concurrency.Scheduler=Concurrency.Scheduler||{};
- SC$2=Global.StartupCode$WebSharper_Main$Concurrency=Global.StartupCode$WebSharper_Main$Concurrency||{};
  DocElemNode=UI.DocElemNode=UI.DocElemNode||{};
  CharacterData=Global.CharacterData;
+ Error=Global.Error;
+ OperationCanceledException=WebSharper.OperationCanceledException=WebSharper.OperationCanceledException||{};
  Abbrev=UI.Abbrev=UI.Abbrev||{};
  Fresh=Abbrev.Fresh=Abbrev.Fresh||{};
  Elt=UI.Elt=UI.Elt||{};
@@ -439,15 +443,11 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  An=UI.An=UI.An||{};
  Settings=Client$2.Settings=Client$2.Settings||{};
  Mailbox=Abbrev.Mailbox=Abbrev.Mailbox||{};
- Error=Global.Error;
- OperationCanceledException=WebSharper.OperationCanceledException=WebSharper.OperationCanceledException||{};
- CancellationTokenSource=WebSharper.CancellationTokenSource=WebSharper.CancellationTokenSource||{};
  Attrs=Client$2.Attrs=Client$2.Attrs||{};
  Dyn=Attrs.Dyn=Attrs.Dyn||{};
  Array=UI.Array=UI.Array||{};
  Attrs$1=UI.Attrs=UI.Attrs||{};
  AttrModule=UI.AttrModule=UI.AttrModule||{};
- Strings=WebSharper.Strings=WebSharper.Strings||{};
  Updates=UI.Updates=UI.Updates||{};
  ValueCollection=Collections.ValueCollection=Collections.ValueCollection||{};
  Docs$1=Client$2.Docs=Client$2.Docs||{};
@@ -482,7 +482,7 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  Date=Global.Date;
  Client$1.Main=function()
  {
-  var a,b,t,L,_this,t$1,t$2,p,i;
+  var mUser,tweets,a,b,Q,_this,t,t$1,t$2,t$3,t$4,p,i;
   function registerUser(user)
   {
    var b$1;
@@ -496,6 +496,38 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    Concurrency.Start((b$1=null,Concurrency.Delay(function()
    {
     return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/users",JSON.stringify(((Provider.Id())())(user))),function(a$1)
+    {
+     mUser=user;
+     Provider.Id();
+     JSON.parse(a$1);
+     return Concurrency.Return(null);
+    });
+   })),null);
+  }
+  function loginUser(user)
+  {
+   (function($1)
+   {
+    return $1("Sending login request to server");
+   }(function(s)
+   {
+    console.log(s);
+   }));
+   mUser=user;
+  }
+  function subscribeTo(subscribe)
+  {
+   var b$1;
+   (function($1)
+   {
+    return $1("Sending subscription request to server");
+   }(function(s)
+   {
+    console.log(s);
+   }));
+   Concurrency.Start((b$1=null,Concurrency.Delay(function()
+   {
+    return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/users/subscribe",JSON.stringify(((Provider.Id())())(subscribe))),function(a$1)
     {
      Provider.Id();
      JSON.parse(a$1);
@@ -523,57 +555,119 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
     });
    })),null);
   }
-  a=(b=(t=(L=Doc.Convert(function(tweet)
+  function searchTweets(query)
   {
-   var b$1,_this$1,_this$2,p$1,i$1;
-   return(b$1=(_this$1=(_this$2=new ProviderBuilder.New$1(),(_this$2.h.push({
-    $:1,
-    $0:"id",
-    $1:tweet.id
-   }),_this$2)),(_this$1.h.push({
+   var b$1;
+   (function($1)
+   {
+    return $1("Sending query to server");
+   }(function(s)
+   {
+    console.log(s);
+   }));
+   b$1=null;
+   return Concurrency.Delay(function()
+   {
+    return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/tweets/search",JSON.stringify(((Provider.Id())())(query))),function(a$1)
+    {
+     return Concurrency.Return(((Provider.DecodeList(Provider.Id()))())(JSON.parse(a$1)));
+    });
+   });
+  }
+  mUser=null;
+  tweets=ListModel.Create(function(tweet)
+  {
+   return tweet.id;
+  },T.Empty);
+  a=(b=(Q=Doc.Convert(function(tweet)
+  {
+   var b$1,_this$1,p$1,i$1;
+   return(b$1=(_this$1=new ProviderBuilder.New$1(),(_this$1.h.push({
     $:1,
     $0:"text",
     $1:tweet.text
-   }),_this$1)),(p$1=Handler.CompleteHoles(b$1.k,b$1.h,[]),(i$1=new TemplateInstance.New(p$1[1],Client_Templates.listitem(p$1[0])),b$1.i=i$1,i$1))).get_Doc();
-  },ListModel.Create(function(tweet)
+   }),_this$1)),(p$1=Handler.CompleteHoles(b$1.k,b$1.h,[]),(i$1=new TemplateInstance.New(p$1[1],Client_Templates.tweet(p$1[0])),b$1.i=i$1,i$1))).get_Doc();
+  },tweets.v),(_this=(t=(t$1=(t$2=(t$3=(t$4=new ProviderBuilder.New$1(),(t$4.h.push(Handler.EventQ2(t$4.k,"onregister",function()
   {
-   return tweet.id;
-  },T.Empty).v),(_this=(t$1=(t$2=new ProviderBuilder.New$1(),(t$2.h.push(Handler.EventQ2(t$2.k,"onregister",function()
-  {
-   return t$2.i;
-  },function(t$3)
+   return t$4.i;
+  },function(t$5)
   {
    registerUser({
     id:0,
-    username:t$3.Vars.Hole("regusername").$1.Get(),
-    password:t$3.Vars.Hole("regpassword").$1.Get()
+    username:t$5.Vars.Hole("regusername").$1.Get(),
+    password:t$5.Vars.Hole("regpassword").$1.Get()
    });
-   t$3.Vars.Hole("regusername").$1.Set("");
-   t$3.Vars.Hole("regpassword").$1.Set("");
-   t$3.Vars.Hole("regconfirmpassword").$1.Set("");
-  })),t$2)),(t$1.h.push(Handler.EventQ2(t$1.k,"login",function()
+   t$5.Vars.Hole("regusername").$1.Set("");
+   t$5.Vars.Hole("regpassword").$1.Set("");
+   t$5.Vars.Hole("regconfirmpassword").$1.Set("");
+  })),t$4)),(t$3.h.push(Handler.EventQ2(t$3.k,"onlogin",function()
+  {
+   return t$3.i;
+  },function(t$5)
+  {
+   loginUser({
+    id:0,
+    username:t$5.Vars.Hole("logusername").$1.Get(),
+    password:t$5.Vars.Hole("logpassword").$1.Get()
+   });
+  })),t$3)),(t$2.h.push(Handler.EventQ2(t$2.k,"onsubscribe",function()
+  {
+   return t$2.i;
+  },function(t$5)
+  {
+   subscribeTo({
+    publisher:t$5.Vars.Hole("publisher").$1.Get(),
+    subscriber:mUser.username
+   });
+  })),t$2)),(t$1.h.push(Handler.EventQ2(t$1.k,"ontweet",function()
   {
    return t$1.i;
-  },function(t$3)
-  {
-   Global.alert(t$3.Vars.Hole("logusername").$1.Get()+t$3.Vars.Hole("logpassword").$1.Get());
-  })),t$1)),(_this.h.push({
-   $:0,
-   $0:"listcontainer",
-   $1:L
-  }),_this))),(t.h.push(Handler.EventQ2(t.k,"ontweet",function()
-  {
-   return t.i;
-  },function(t$3)
+  },function(t$5)
   {
    postTweet({
     id:"",
     reId:"",
-    text:t$3.Vars.Hole("tweettext").$1.Get(),
+    text:t$5.Vars.Hole("tweettext").$1.Get(),
     tType:"tweet",
     by:"Deep"
    });
-  })),t)),(p=Handler.CompleteHoles(b.k,b.h,[["regusername",0],["regpassword",0],["regconfirmpassword",0],["logusername",0],["logpassword",0],["tweettext",0]]),(i=new TemplateInstance.New(p[1],Client_Templates.main(p[0])),b.i=i,i))).get_Doc();
+  })),t$1)),(t.h.push(Handler.EventQ2(t.k,"onsearch",function()
+  {
+   return t.i;
+  },function(t$5)
+  {
+   var qName,newQuery,b$1;
+   tweets.Clear();
+   qName=t$5.Vars.Hole("queryname").$1.Get();
+   newQuery=qName===""?{
+    qType:"subscription",
+    qName:qName,
+    by:mUser.username
+   }:Strings.StartsWith(qName,"#")?{
+    qType:"hashtag",
+    qName:qName,
+    by:mUser.username
+   }:{
+    qType:"mention",
+    qName:qName,
+    by:mUser.username
+   };
+   Concurrency.Start((b$1=null,Concurrency.Delay(function()
+   {
+    return Concurrency.Bind(searchTweets(newQuery),function(a$1)
+    {
+     List.iter(function(tweet)
+     {
+      tweets.Append(tweet);
+     },a$1);
+     return Concurrency.Zero();
+    });
+   })),null);
+  })),t)),(_this.h.push({
+   $:0,
+   $0:"queryresults",
+   $1:Q
+  }),_this))),(p=Handler.CompleteHoles(b.k,b.h,[["regusername",0],["regpassword",0],["regconfirmpassword",0],["logusername",0],["logpassword",0],["publisher",0],["tweettext",0],["queryname",0]]),(i=new TemplateInstance.New(p[1],Client_Templates.main(p[0])),b.i=i,i))).get_Doc();
   Templates.LoadLocalTemplates("");
   Doc.RunById("main",a);
  };
@@ -594,240 +688,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
   {
    return a.apply(null,[$1,$2,$3]);
   });
- };
- ListModel.Create=function(key,init)
- {
-  return ListModel.CreateWithStorage(key,Storage.InMemory(Arrays.ofSeq(init)));
- };
- ListModel.CreateWithStorage=function(key,storage)
- {
-  return new ListModel.New(key,storage);
- };
- T=List.T=Runtime$1.Class({
-  GetEnumerator:function()
-  {
-   return new T$1.New(this,null,function(e)
-   {
-    var m;
-    m=e.s;
-    return m.$==0?false:(e.c=m.$0,e.s=m.$1,true);
-   },void 0);
-  },
-  GetEnumerator0:function()
-  {
-   return Enumerator.Get(this);
-  }
- },null,T);
- T.Empty=new T({
-  $:0
- });
- Obj=WebSharper.Obj=Runtime$1.Class({
-  Equals:function(obj)
-  {
-   return this===obj;
-  },
-  GetHashCode:function()
-  {
-   return -1;
-  }
- },null,Obj);
- Obj.New=Runtime$1.Ctor(function()
- {
- },Obj);
- ListModel=UI.ListModel=Runtime$1.Class({
-  Append:function(item)
-  {
-   var $this,v,t,m;
-   $this=this;
-   v=this["var"].Get();
-   t=this.key(item);
-   m=Arrays.tryFindIndex(function(it)
-   {
-    return Unchecked.Equals($this.key(it),t);
-   },v);
-   m!=null&&m.$==1?this["var"].Set(this.storage.SSetAt(m.$0,item,v)):this["var"].Set(this.storage.SAppend(item,v));
-   this.ObsoleteKey(t);
-  },
-  ObsoleteKey:function(key)
-  {
-   var m,o;
-   m=(o=null,[this.it.TryGetValue(key,{
-    get:function()
-    {
-     return o;
-    },
-    set:function(v)
-    {
-     o=v;
-    }
-   }),o]);
-   m[0]?(Snap.Obsolete(m[1]),this.it.Remove(key)):void 0;
-  },
-  GetEnumerator:function()
-  {
-   return Enumerator.Get(this["var"].Get());
-  },
-  GetEnumerator0:function()
-  {
-   return Enumerator.Get0(this["var"].Get());
-  }
- },Obj,ListModel);
- ListModel.New=Runtime$1.Ctor(function(key,storage)
- {
-  ListModel.New$3.call(this,key,Var$1.Create$1(Arrays.ofSeq(Seq.distinctBy(key,storage.SInit()))),storage);
- },ListModel);
- ListModel.New$3=Runtime$1.Ctor(function(key,_var,storage)
- {
-  Obj.New.call(this);
-  this.key=key;
-  this["var"]=_var;
-  this.storage=storage;
-  this.v=View.Map(function(x)
-  {
-   return x.slice();
-  },this["var"].get_View());
-  this.it=new Dictionary.New$5();
- },ListModel);
- Operators.FailWith=function(msg)
- {
-  throw new Error(msg);
- };
- Operators.KeyValue=function(kvp)
- {
-  return[kvp.K,kvp.V];
- };
- TemplateInstance=Server.TemplateInstance=Runtime$1.Class({
-  get_Doc:function()
-  {
-   return this.doc;
-  },
-  Hole:function(name)
-  {
-   return this.allVars.get_Item(name);
-  }
- },Obj,TemplateInstance);
- TemplateInstance.New=Runtime$1.Ctor(function(c,doc)
- {
-  Obj.New.call(this);
-  this.doc=doc;
-  this.allVars=c.$==0?c.$0:Operators.FailWith("Should not happen");
- },TemplateInstance);
- Arrays.get=function(arr,n)
- {
-  Arrays.checkBounds(arr,n);
-  return arr[n];
- };
- Arrays.set=function(arr,n,x)
- {
-  Arrays.checkBounds(arr,n);
-  arr[n]=x;
- };
- Arrays.length=function(arr)
- {
-  return arr.dims===2?arr.length*arr.length:arr.length;
- };
- Arrays.checkBounds=function(arr,n)
- {
-  if(n<0||n>=arr.length)
-   Operators.FailWith("Index was outside the bounds of the array.");
- };
- ProviderBuilder=Server.ProviderBuilder=Runtime$1.Class({},Obj,ProviderBuilder);
- ProviderBuilder.New$1=Runtime$1.Ctor(function()
- {
-  var c;
-  Obj.New.call(this);
-  this.i=null;
-  this.k=(c=Guid.NewGuid(),Global.String(c));
-  this.h=[];
-  Runtime$1.SetOptional(this,"s",null);
- },ProviderBuilder);
- Handler.EventQ2=function(key,holeName,ti,f)
- {
-  return{
-   $:5,
-   $0:holeName,
-   $1:function(el)
-   {
-    return function(ev)
-    {
-     return f({
-      Vars:ti(),
-      Target:el,
-      Event:ev
-     });
-    };
-   }
-  };
- };
- Handler.CompleteHoles=function(key,filledHoles,vars)
- {
-  var allVars,filledVars,e,h,n;
-  function c(name,ty)
-  {
-   var r;
-   return filledVars.Contains(name)?null:(r=ty===0?TemplateInitializer.GetOrAddHoleFor(key,name,function()
-   {
-    return{
-     $:8,
-     $0:name,
-     $1:Var$1.Create$1("")
-    };
-   }):ty===1?TemplateInitializer.GetOrAddHoleFor(key,name,function()
-   {
-    return{
-     $:13,
-     $0:name,
-     $1:Var$1.Create$1(0)
-    };
-   }):ty===2?TemplateInitializer.GetOrAddHoleFor(key,name,function()
-   {
-    return{
-     $:9,
-     $0:name,
-     $1:Var$1.Create$1(false)
-    };
-   }):Operators.FailWith("Invalid value type"),(allVars.set_Item(name,r),{
-    $:1,
-    $0:r
-   }));
-  }
-  allVars=new Dictionary.New$5();
-  filledVars=new HashSet.New$3();
-  e=Enumerator.Get(filledHoles);
-  try
-  {
-   while(e.MoveNext())
-    {
-     h=e.Current();
-     n=h.$0;
-     filledVars.Add(n);
-     allVars.set_Item(n,h);
-    }
-  }
-  finally
-  {
-   if(typeof e=="object"&&"Dispose"in e)
-    e.Dispose();
-  }
-  return[Seq.append(filledHoles,Arrays.choose(function($1)
-  {
-   return c($1[0],$1[1]);
-  },vars)),{
-   $:0,
-   $0:allVars
-  }];
- };
- Var=UI.Var=Runtime$1.Class({},Obj,Var);
- Var.New=Runtime$1.Ctor(function()
- {
-  Obj.New.call(this);
- },Var);
- JS.GetFieldValues=function(o)
- {
-  var r,k;
-  r=[];
-  for(var k$1 in o)r.push(o[k$1]);
-  return r;
  };
  Unchecked.Equals=function(a,b)
  {
@@ -1022,12 +882,289 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  {
   return Unchecked.Compare(a.getTime(),b.getTime());
  };
- Client_Templates.listitem=function(h)
+ ListModel.Create=function(key,init)
+ {
+  return ListModel.CreateWithStorage(key,Storage.InMemory(Arrays.ofSeq(init)));
+ };
+ ListModel.CreateWithStorage=function(key,storage)
+ {
+  return new ListModel.New(key,storage);
+ };
+ T=List.T=Runtime$1.Class({
+  GetEnumerator:function()
+  {
+   return new T$1.New(this,null,function(e)
+   {
+    var m;
+    m=e.s;
+    return m.$==0?false:(e.c=m.$0,e.s=m.$1,true);
+   },void 0);
+  },
+  GetEnumerator0:function()
+  {
+   return Enumerator.Get(this);
+  }
+ },null,T);
+ T.Empty=new T({
+  $:0
+ });
+ Obj=WebSharper.Obj=Runtime$1.Class({
+  Equals:function(obj)
+  {
+   return this===obj;
+  },
+  GetHashCode:function()
+  {
+   return -1;
+  }
+ },null,Obj);
+ Obj.New=Runtime$1.Ctor(function()
+ {
+ },Obj);
+ ListModel=UI.ListModel=Runtime$1.Class({
+  Clear:function()
+  {
+   this["var"].Set(this.storage.SSet([]));
+   this.ObsoleteAll();
+  },
+  Append:function(item)
+  {
+   var $this,v,t,m;
+   $this=this;
+   v=this["var"].Get();
+   t=this.key(item);
+   m=Arrays.tryFindIndex(function(it)
+   {
+    return Unchecked.Equals($this.key(it),t);
+   },v);
+   m!=null&&m.$==1?this["var"].Set(this.storage.SSetAt(m.$0,item,v)):this["var"].Set(this.storage.SAppend(item,v));
+   this.ObsoleteKey(t);
+  },
+  ObsoleteAll:function()
+  {
+   Seq.iter(function(ksn)
+   {
+    Snap.Obsolete(ksn.V);
+   },this.it);
+   this.it.Clear();
+  },
+  ObsoleteKey:function(key)
+  {
+   var m,o;
+   m=(o=null,[this.it.TryGetValue(key,{
+    get:function()
+    {
+     return o;
+    },
+    set:function(v)
+    {
+     o=v;
+    }
+   }),o]);
+   m[0]?(Snap.Obsolete(m[1]),this.it.Remove(key)):void 0;
+  },
+  GetEnumerator:function()
+  {
+   return Enumerator.Get(this["var"].Get());
+  },
+  GetEnumerator0:function()
+  {
+   return Enumerator.Get0(this["var"].Get());
+  }
+ },Obj,ListModel);
+ ListModel.New=Runtime$1.Ctor(function(key,storage)
+ {
+  ListModel.New$3.call(this,key,Var$1.Create$1(Arrays.ofSeq(Seq.distinctBy(key,storage.SInit()))),storage);
+ },ListModel);
+ ListModel.New$3=Runtime$1.Ctor(function(key,_var,storage)
+ {
+  Obj.New.call(this);
+  this.key=key;
+  this["var"]=_var;
+  this.storage=storage;
+  this.v=View.Map(function(x)
+  {
+   return x.slice();
+  },this["var"].get_View());
+  this.it=new Dictionary.New$5();
+ },ListModel);
+ Operators.FailWith=function(msg)
+ {
+  throw new Error(msg);
+ };
+ Operators.KeyValue=function(kvp)
+ {
+  return[kvp.K,kvp.V];
+ };
+ TemplateInstance=Server.TemplateInstance=Runtime$1.Class({
+  get_Doc:function()
+  {
+   return this.doc;
+  },
+  Hole:function(name)
+  {
+   return this.allVars.get_Item(name);
+  }
+ },Obj,TemplateInstance);
+ TemplateInstance.New=Runtime$1.Ctor(function(c,doc)
+ {
+  Obj.New.call(this);
+  this.doc=doc;
+  this.allVars=c.$==0?c.$0:Operators.FailWith("Should not happen");
+ },TemplateInstance);
+ Arrays.get=function(arr,n)
+ {
+  Arrays.checkBounds(arr,n);
+  return arr[n];
+ };
+ Arrays.length=function(arr)
+ {
+  return arr.dims===2?arr.length*arr.length:arr.length;
+ };
+ Arrays.checkBounds=function(arr,n)
+ {
+  if(n<0||n>=arr.length)
+   Operators.FailWith("Index was outside the bounds of the array.");
+ };
+ Arrays.set=function(arr,n,x)
+ {
+  Arrays.checkBounds(arr,n);
+  arr[n]=x;
+ };
+ ProviderBuilder=Server.ProviderBuilder=Runtime$1.Class({},Obj,ProviderBuilder);
+ ProviderBuilder.New$1=Runtime$1.Ctor(function()
+ {
+  var c;
+  Obj.New.call(this);
+  this.i=null;
+  this.k=(c=Guid.NewGuid(),Global.String(c));
+  this.h=[];
+  Runtime$1.SetOptional(this,"s",null);
+ },ProviderBuilder);
+ Handler.EventQ2=function(key,holeName,ti,f)
+ {
+  return{
+   $:5,
+   $0:holeName,
+   $1:function(el)
+   {
+    return function(ev)
+    {
+     return f({
+      Vars:ti(),
+      Target:el,
+      Event:ev
+     });
+    };
+   }
+  };
+ };
+ Handler.CompleteHoles=function(key,filledHoles,vars)
+ {
+  var allVars,filledVars,e,h,n;
+  function c(name,ty)
+  {
+   var r;
+   return filledVars.Contains(name)?null:(r=ty===0?TemplateInitializer.GetOrAddHoleFor(key,name,function()
+   {
+    return{
+     $:8,
+     $0:name,
+     $1:Var$1.Create$1("")
+    };
+   }):ty===1?TemplateInitializer.GetOrAddHoleFor(key,name,function()
+   {
+    return{
+     $:13,
+     $0:name,
+     $1:Var$1.Create$1(0)
+    };
+   }):ty===2?TemplateInitializer.GetOrAddHoleFor(key,name,function()
+   {
+    return{
+     $:9,
+     $0:name,
+     $1:Var$1.Create$1(false)
+    };
+   }):Operators.FailWith("Invalid value type"),(allVars.set_Item(name,r),{
+    $:1,
+    $0:r
+   }));
+  }
+  allVars=new Dictionary.New$5();
+  filledVars=new HashSet.New$3();
+  e=Enumerator.Get(filledHoles);
+  try
+  {
+   while(e.MoveNext())
+    {
+     h=e.Current();
+     n=h.$0;
+     filledVars.Add(n);
+     allVars.set_Item(n,h);
+    }
+  }
+  finally
+  {
+   if(typeof e=="object"&&"Dispose"in e)
+    e.Dispose();
+  }
+  return[Seq.append(filledHoles,Arrays.choose(function($1)
+  {
+   return c($1[0],$1[1]);
+  },vars)),{
+   $:0,
+   $0:allVars
+  }];
+ };
+ Var=UI.Var=Runtime$1.Class({},Obj,Var);
+ Var.New=Runtime$1.Ctor(function()
+ {
+  Obj.New.call(this);
+ },Var);
+ List.iter=function(f,l)
+ {
+  var r;
+  r=l;
+  while(r.$==1)
+   {
+    f(List.head(r));
+    r=List.tail(r);
+   }
+ };
+ List.init=function(s,f)
+ {
+  return List.ofArray(Arrays.init(s,f));
+ };
+ List.head=function(l)
+ {
+  return l.$==1?l.$0:List.listEmpty();
+ };
+ List.tail=function(l)
+ {
+  return l.$==1?l.$1:List.listEmpty();
+ };
+ List.ofArray=function(arr)
+ {
+  var r,i,$1;
+  r=T.Empty;
+  for(i=Arrays.length(arr)-1,$1=0;i>=$1;i--)r=new T({
+   $:1,
+   $0:Arrays.get(arr,i),
+   $1:r
+  });
+  return r;
+ };
+ List.listEmpty=function()
+ {
+  return Operators.FailWith("The input list was empty.");
+ };
+ Client_Templates.tweet=function(h)
  {
   Templates.LoadLocalTemplates("index");
   return h?Templates.NamedTemplate("index",{
    $:1,
-   $0:"listitem"
+   $0:"tweet"
   },h):void 0;
  };
  Client_Templates.main=function(h)
@@ -1042,9 +1179,33 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  {
   return x;
  });
+ Provider.DecodeList=Runtime$1.Curried3(function(decEl,$1,a)
+ {
+  var e;
+  e=decEl();
+  return List.init(Arrays.length(a),function(i)
+  {
+   return e(Arrays.get(a,i));
+  });
+ });
  Storage.InMemory=function(init)
  {
   return new ArrayStorage.New(init);
+ };
+ Seq.iter=function(p,s)
+ {
+  var e;
+  e=Enumerator.Get(s);
+  try
+  {
+   while(e.MoveNext())
+    p(e.Current());
+  }
+  finally
+  {
+   if(typeof e=="object"&&"Dispose"in e)
+    e.Dispose();
+  }
  };
  Seq.append=function(s1,s2)
  {
@@ -1122,21 +1283,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    while(e.MoveNext())
     r=f(r,e.Current());
    return r;
-  }
-  finally
-  {
-   if(typeof e=="object"&&"Dispose"in e)
-    e.Dispose();
-  }
- };
- Seq.iter=function(p,s)
- {
-  var e;
-  e=Enumerator.Get(s);
-  try
-  {
-   while(e.MoveNext())
-    p(e.Current());
   }
   finally
   {
@@ -1251,6 +1397,11 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
     }:null;
    },d);
   },
+  Clear:function()
+  {
+   this.data=[];
+   this.count=0;
+  },
   set_Item:function(k,v)
   {
    this.set(k,v);
@@ -1359,6 +1510,217 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
     e.Dispose();
   }
  },Dictionary);
+ Pervasives.NewFromSeq=function(fields)
+ {
+  var r,e,f;
+  r={};
+  e=Enumerator.Get(fields);
+  try
+  {
+   while(e.MoveNext())
+    {
+     f=e.Current();
+     r[f[0]]=f[1];
+    }
+  }
+  finally
+  {
+   if(typeof e=="object"&&"Dispose"in e)
+    e.Dispose();
+  }
+  return r;
+ };
+ Concurrency.Delay=function(mk)
+ {
+  return function(c)
+  {
+   try
+   {
+    (mk(null))(c);
+   }
+   catch(e)
+   {
+    c.k({
+     $:1,
+     $0:e
+    });
+   }
+  };
+ };
+ Concurrency.Bind=function(r,f)
+ {
+  return Concurrency.checkCancel(function(c)
+  {
+   r(AsyncBody.New(function(a)
+   {
+    var x;
+    if(a.$==0)
+     {
+      x=a.$0;
+      Concurrency.scheduler().Fork(function()
+      {
+       try
+       {
+        (f(x))(c);
+       }
+       catch(e)
+       {
+        c.k({
+         $:1,
+         $0:e
+        });
+       }
+      });
+     }
+    else
+     Concurrency.scheduler().Fork(function()
+     {
+      c.k(a);
+     });
+   },c.ct));
+  });
+ };
+ Concurrency.Zero=function()
+ {
+  SC$1.$cctor();
+  return SC$1.Zero;
+ };
+ Concurrency.Start=function(c,ctOpt)
+ {
+  var ct,d;
+  ct=(d=(Concurrency.defCTS())[0],ctOpt==null?d:ctOpt.$0);
+  Concurrency.scheduler().Fork(function()
+  {
+   if(!ct.c)
+    c(AsyncBody.New(function(a)
+    {
+     if(a.$==1)
+      Concurrency.UncaughtAsyncError(a.$0);
+    },ct));
+  });
+ };
+ Concurrency.Return=function(x)
+ {
+  return function(c)
+  {
+   c.k({
+    $:0,
+    $0:x
+   });
+  };
+ };
+ Concurrency.checkCancel=function(r)
+ {
+  return function(c)
+  {
+   if(c.ct.c)
+    Concurrency.cancel(c);
+   else
+    r(c);
+  };
+ };
+ Concurrency.defCTS=function()
+ {
+  SC$1.$cctor();
+  return SC$1.defCTS;
+ };
+ Concurrency.UncaughtAsyncError=function(e)
+ {
+  console.log("WebSharper: Uncaught asynchronous exception",e);
+ };
+ Concurrency.FromContinuations=function(subscribe)
+ {
+  return function(c)
+  {
+   var continued;
+   function once(cont)
+   {
+    if(continued[0])
+     Operators.FailWith("A continuation provided by Async.FromContinuations was invoked multiple times");
+    else
+     {
+      continued[0]=true;
+      Concurrency.scheduler().Fork(cont);
+     }
+   }
+   continued=[false];
+   subscribe(function(a)
+   {
+    once(function()
+    {
+     c.k({
+      $:0,
+      $0:a
+     });
+    });
+   },function(e)
+   {
+    once(function()
+    {
+     c.k({
+      $:1,
+      $0:e
+     });
+    });
+   },function(e)
+   {
+    once(function()
+    {
+     c.k({
+      $:2,
+      $0:e
+     });
+    });
+   });
+  };
+ };
+ Concurrency.cancel=function(c)
+ {
+  c.k({
+   $:2,
+   $0:new OperationCanceledException.New(c.ct)
+  });
+ };
+ Concurrency.scheduler=function()
+ {
+  SC$1.$cctor();
+  return SC$1.scheduler;
+ };
+ Strings.StartsWith=function(t,s)
+ {
+  return t.substring(0,s.length)==s;
+ };
+ Strings.concat=function(separator,strings)
+ {
+  return Arrays.ofSeq(strings).join(separator);
+ };
+ Strings.SplitChars=function(s,sep,opts)
+ {
+  return Strings.Split(s,new Global.RegExp("["+Strings.RegexEscape(sep.join(""))+"]"),opts);
+ };
+ Strings.Split=function(s,pat,opts)
+ {
+  return opts===1?Arrays.filter(function(x)
+  {
+   return x!=="";
+  },Strings.SplitWith(s,pat)):Strings.SplitWith(s,pat);
+ };
+ Strings.RegexEscape=function(s)
+ {
+  return s.replace(new Global.RegExp("[-\\/\\\\^$*+?.()|[\\]{}]","g"),"\\$&");
+ };
+ Strings.SplitWith=function(str,pat)
+ {
+  return str.split(pat);
+ };
+ Strings.forall=function(f,s)
+ {
+  return Seq.forall(f,Strings.protect(s));
+ };
+ Strings.protect=function(s)
+ {
+  return s===null?"":s;
+ };
  Templates.LoadLocalTemplates=function(baseName)
  {
   !Templates.LocalTemplatesLoaded()?(Templates.set_LocalTemplatesLoaded(true),Templates.LoadNestedTemplates(self.document.body,"")):void 0;
@@ -1381,13 +1743,13 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  };
  Templates.LocalTemplatesLoaded=function()
  {
-  SC$1.$cctor();
-  return SC$1.LocalTemplatesLoaded;
+  SC$2.$cctor();
+  return SC$2.LocalTemplatesLoaded;
  };
  Templates.set_LocalTemplatesLoaded=function($1)
  {
-  SC$1.$cctor();
-  SC$1.LocalTemplatesLoaded=$1;
+  SC$2.$cctor();
+  SC$2.LocalTemplatesLoaded=$1;
  };
  Templates.LoadNestedTemplates=function(root,baseName)
  {
@@ -1438,8 +1800,8 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  };
  Templates.LoadedTemplates=function()
  {
-  SC$1.$cctor();
-  return SC$1.LoadedTemplates;
+  SC$2.$cctor();
+  return SC$2.LoadedTemplates;
  };
  Templates.LoadedTemplateFile=function(name)
  {
@@ -2007,8 +2369,8 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  };
  Templates.GlobalHoles=function()
  {
-  SC$1.$cctor();
-  return SC$1.GlobalHoles;
+  SC$2.$cctor();
+  return SC$2.GlobalHoles;
  };
  Templates.foreachNotPreserved=function(root,selector,f)
  {
@@ -2029,8 +2391,8 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  };
  Templates.TextHoleRE=function()
  {
-  SC$1.$cctor();
-  return SC$1.TextHoleRE;
+  SC$2.$cctor();
+  return SC$2.TextHoleRE;
  };
  Doc=UI.Doc=Runtime$1.Class({},Obj,Doc);
  Doc.RunById=function(id,tr)
@@ -2121,183 +2483,11 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
   this.docNode=docNode;
   this.updates=updates;
  },Doc);
- Pervasives.NewFromSeq=function(fields)
- {
-  var r,e,f;
-  r={};
-  e=Enumerator.Get(fields);
-  try
-  {
-   while(e.MoveNext())
-    {
-     f=e.Current();
-     r[f[0]]=f[1];
-    }
-  }
-  finally
-  {
-   if(typeof e=="object"&&"Dispose"in e)
-    e.Dispose();
-  }
-  return r;
- };
- Concurrency.Delay=function(mk)
- {
-  return function(c)
-  {
-   try
-   {
-    (mk(null))(c);
-   }
-   catch(e)
-   {
-    c.k({
-     $:1,
-     $0:e
-    });
-   }
-  };
- };
- Concurrency.Bind=function(r,f)
- {
-  return Concurrency.checkCancel(function(c)
-  {
-   r(AsyncBody.New(function(a)
-   {
-    var x;
-    if(a.$==0)
-     {
-      x=a.$0;
-      Concurrency.scheduler().Fork(function()
-      {
-       try
-       {
-        (f(x))(c);
-       }
-       catch(e)
-       {
-        c.k({
-         $:1,
-         $0:e
-        });
-       }
-      });
-     }
-    else
-     Concurrency.scheduler().Fork(function()
-     {
-      c.k(a);
-     });
-   },c.ct));
-  });
- };
- Concurrency.Return=function(x)
- {
-  return function(c)
-  {
-   c.k({
-    $:0,
-    $0:x
-   });
-  };
- };
- Concurrency.Start=function(c,ctOpt)
- {
-  var ct,d;
-  ct=(d=(Concurrency.defCTS())[0],ctOpt==null?d:ctOpt.$0);
-  Concurrency.scheduler().Fork(function()
-  {
-   if(!ct.c)
-    c(AsyncBody.New(function(a)
-    {
-     if(a.$==1)
-      Concurrency.UncaughtAsyncError(a.$0);
-    },ct));
-  });
- };
- Concurrency.checkCancel=function(r)
- {
-  return function(c)
-  {
-   if(c.ct.c)
-    Concurrency.cancel(c);
-   else
-    r(c);
-  };
- };
- Concurrency.FromContinuations=function(subscribe)
- {
-  return function(c)
-  {
-   var continued;
-   function once(cont)
-   {
-    if(continued[0])
-     Operators.FailWith("A continuation provided by Async.FromContinuations was invoked multiple times");
-    else
-     {
-      continued[0]=true;
-      Concurrency.scheduler().Fork(cont);
-     }
-   }
-   continued=[false];
-   subscribe(function(a)
-   {
-    once(function()
-    {
-     c.k({
-      $:0,
-      $0:a
-     });
-    });
-   },function(e)
-   {
-    once(function()
-    {
-     c.k({
-      $:1,
-      $0:e
-     });
-    });
-   },function(e)
-   {
-    once(function()
-    {
-     c.k({
-      $:2,
-      $0:e
-     });
-    });
-   });
-  };
- };
- Concurrency.defCTS=function()
- {
-  SC$2.$cctor();
-  return SC$2.defCTS;
- };
- Concurrency.UncaughtAsyncError=function(e)
- {
-  console.log("WebSharper: Uncaught asynchronous exception",e);
- };
- Concurrency.cancel=function(c)
- {
-  c.k({
-   $:2,
-   $0:new OperationCanceledException.New(c.ct)
-  });
- };
- Concurrency.scheduler=function()
- {
-  SC$2.$cctor();
-  return SC$2.scheduler;
- };
- Concurrency.Zero=function()
- {
-  SC$2.$cctor();
-  return SC$2.Zero;
- };
  ArrayStorage=Storage.ArrayStorage=Runtime$1.Class({
+  SSet:function(coll)
+  {
+   return Arrays.ofSeq(coll);
+  },
   SSetAt:function(idx,elem,arr)
   {
    Arrays.set(arr,idx,elem);
@@ -2367,6 +2557,14 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    m==null?void 0:q.push(m.$0);
   }
   return q;
+ };
+ Arrays.init=function(size,f)
+ {
+  var r,i,$1;
+  size<0?Operators.FailWith("Negative size given."):null;
+  r=new Global.Array(size);
+  for(i=0,$1=size-1;i<=$1;i++)r[i]=f(i);
+  return r;
  };
  Arrays.ofList=function(xs)
  {
@@ -2464,14 +2662,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
   for(i=0,$1=size-1;i<=$1;i++)r[i]=value;
   return r;
  };
- Arrays.init=function(size,f)
- {
-  var r,i,$1;
-  size<0?Operators.FailWith("Negative size given."):null;
-  r=new Global.Array(size);
-  for(i=0,$1=size-1;i<=$1;i++)r[i]=f(i);
-  return r;
- };
  View=UI.View=Runtime$1.Class({},null,View);
  Snap.Obsolete=function(sn)
  {
@@ -2538,220 +2728,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  Numeric.TryParseInt32=function(s,r)
  {
   return Numeric.TryParse(s,-2147483648,2147483647,r);
- };
- HashSet=Collections.HashSet=Runtime$1.Class({
-  Add:function(item)
-  {
-   return this.add(item);
-  },
-  Contains:function(item)
-  {
-   var arr;
-   arr=this.data[this.hash(item)];
-   return arr==null?false:this.arrContains(item,arr);
-  },
-  add:function(item)
-  {
-   var h,arr;
-   h=this.hash(item);
-   arr=this.data[h];
-   return arr==null?(this.data[h]=[item],this.count=this.count+1,true):this.arrContains(item,arr)?false:(arr.push(item),this.count=this.count+1,true);
-  },
-  arrContains:function(item,arr)
-  {
-   var c,i,$1,l;
-   c=true;
-   i=0;
-   l=arr.length;
-   while(c&&i<l)
-    if(this.equals.apply(null,[arr[i],item]))
-     c=false;
-    else
-     i=i+1;
-   return!c;
-  },
-  ExceptWith:function(xs)
-  {
-   var e;
-   e=Enumerator.Get(xs);
-   try
-   {
-    while(e.MoveNext())
-     this.Remove(e.Current());
-   }
-   finally
-   {
-    if(typeof e=="object"&&"Dispose"in e)
-     e.Dispose();
-   }
-  },
-  get_Count:function()
-  {
-   return this.count;
-  },
-  CopyTo:function(arr)
-  {
-   var i,all,i$1,$1;
-   i=0;
-   all=HashSetUtil.concat(this.data);
-   for(i$1=0,$1=all.length-1;i$1<=$1;i$1++)Arrays.set(arr,i$1,all[i$1]);
-  },
-  IntersectWith:function(xs)
-  {
-   var other,all,i,$1,item;
-   other=new HashSet.New$4(xs,this.equals,this.hash);
-   all=HashSetUtil.concat(this.data);
-   for(i=0,$1=all.length-1;i<=$1;i++){
-    item=all[i];
-    !other.Contains(item)?this.Remove(item):void 0;
-   }
-  },
-  Remove:function(item)
-  {
-   var arr;
-   arr=this.data[this.hash(item)];
-   return arr==null?false:this.arrRemove(item,arr)&&(this.count=this.count-1,true);
-  },
-  arrRemove:function(item,arr)
-  {
-   var c,i,$1,l;
-   c=true;
-   i=0;
-   l=arr.length;
-   while(c&&i<l)
-    if(this.equals.apply(null,[arr[i],item]))
-     {
-      arr.splice.apply(arr,[i,1]);
-      c=false;
-     }
-    else
-     i=i+1;
-   return!c;
-  },
-  GetEnumerator:function()
-  {
-   return Enumerator.Get(HashSetUtil.concat(this.data));
-  },
-  GetEnumerator0:function()
-  {
-   return Enumerator.Get(HashSetUtil.concat(this.data));
-  }
- },Obj,HashSet);
- HashSet.New$3=Runtime$1.Ctor(function()
- {
-  HashSet.New$4.call(this,[],Unchecked.Equals,Unchecked.Hash);
- },HashSet);
- HashSet.New$4=Runtime$1.Ctor(function(init,equals,hash)
- {
-  var e;
-  Obj.New.call(this);
-  this.equals=equals;
-  this.hash=hash;
-  this.data=[];
-  this.count=0;
-  e=Enumerator.Get(init);
-  try
-  {
-   while(e.MoveNext())
-    this.add(e.Current());
-  }
-  finally
-  {
-   if(typeof e=="object"&&"Dispose"in e)
-    e.Dispose();
-  }
- },HashSet);
- HashSet.New$2=Runtime$1.Ctor(function(init)
- {
-  HashSet.New$4.call(this,init,Unchecked.Equals,Unchecked.Hash);
- },HashSet);
- TemplateInitializer.$cctor=function()
- {
-  TemplateInitializer.$cctor=Global.ignore;
-  TemplateInitializer.initialized=new Dictionary.New$5();
- };
- TemplateInitializer=Server.TemplateInitializer=Runtime$1.Class({},Obj,TemplateInitializer);
- TemplateInitializer.GetOrAddHoleFor=function(id,holeName,initHole)
- {
-  var d,m,o,h;
-  TemplateInitializer.$cctor();
-  d=TemplateInitializer.GetHolesFor(id);
-  m=(o=null,[d.TryGetValue(holeName,{
-   get:function()
-   {
-    return o;
-   },
-   set:function(v)
-   {
-    o=v;
-   }
-  }),o]);
-  return m[0]?m[1]:(h=initHole(),(d.set_Item(holeName,h),h));
- };
- TemplateInitializer.GetHolesFor=function(id)
- {
-  var m,o,d;
-  TemplateInitializer.$cctor();
-  m=(o=null,[TemplateInitializer.initialized.TryGetValue(id,{
-   get:function()
-   {
-    return o;
-   },
-   set:function(v)
-   {
-    o=v;
-   }
-  }),o]);
-  return m[0]?m[1]:(d=new Dictionary.New$5(),(TemplateInitializer.initialized.set_Item(id,d),d));
- };
- Var$1=UI.Var$1=Runtime$1.Class({},Obj,Var$1);
- Var$1.Create$1=function(v)
- {
-  return new ConcreteVar.New(false,Snap.New({
-   $:2,
-   $0:v,
-   $1:[]
-  }),v);
- };
- AsyncBody.New=function(k,ct)
- {
-  return{
-   k:k,
-   ct:ct
-  };
- };
- CT.New=function(IsCancellationRequested,Registrations)
- {
-  return{
-   c:IsCancellationRequested,
-   r:Registrations
-  };
- };
- Enumerator.Get=function(x)
- {
-  return x instanceof Global.Array?Enumerator.ArrayEnumerator(x):Unchecked.Equals(typeof x,"string")?Enumerator.StringEnumerator(x):x.GetEnumerator();
- };
- Enumerator.ArrayEnumerator=function(s)
- {
-  return new T$1.New(0,null,function(e)
-  {
-   var i;
-   i=e.s;
-   return i<Arrays.length(s)&&(e.c=Arrays.get(s,i),e.s=i+1,true);
-  },void 0);
- };
- Enumerator.StringEnumerator=function(s)
- {
-  return new T$1.New(0,null,function(e)
-  {
-   var i;
-   i=e.s;
-   return i<s.length&&(e.c=s[i],e.s=i+1,true);
-  },void 0);
- };
- Enumerator.Get0=function(x)
- {
-  return x instanceof Global.Array?Enumerator.ArrayEnumerator(x):Unchecked.Equals(typeof x,"string")?Enumerator.StringEnumerator(x):"GetEnumerator0"in x?x.GetEnumerator0():x.GetEnumerator();
  };
  Snap.Map=function(fn,sn)
  {
@@ -3076,10 +3052,294 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
   m=snap.s;
   m==null?Snap.Obsolete(obs):m!=null&&m.$==2?Snap.EnqueueSafe(m.$1,obs):m!=null&&m.$==3?Snap.EnqueueSafe(m.$1,obs):void 0;
  };
+ AsyncBody.New=function(k,ct)
+ {
+  return{
+   k:k,
+   ct:ct
+  };
+ };
+ SC$1.$cctor=function()
+ {
+  SC$1.$cctor=Global.ignore;
+  SC$1.noneCT=CT.New(false,[]);
+  SC$1.scheduler=new Scheduler.New();
+  SC$1.defCTS=[new CancellationTokenSource.New()];
+  SC$1.Zero=Concurrency.Return();
+  SC$1.GetCT=function(c)
+  {
+   c.k({
+    $:0,
+    $0:c.ct
+   });
+  };
+ };
+ CT.New=function(IsCancellationRequested,Registrations)
+ {
+  return{
+   c:IsCancellationRequested,
+   r:Registrations
+  };
+ };
+ HashSet=Collections.HashSet=Runtime$1.Class({
+  Add:function(item)
+  {
+   return this.add(item);
+  },
+  Contains:function(item)
+  {
+   var arr;
+   arr=this.data[this.hash(item)];
+   return arr==null?false:this.arrContains(item,arr);
+  },
+  add:function(item)
+  {
+   var h,arr;
+   h=this.hash(item);
+   arr=this.data[h];
+   return arr==null?(this.data[h]=[item],this.count=this.count+1,true):this.arrContains(item,arr)?false:(arr.push(item),this.count=this.count+1,true);
+  },
+  arrContains:function(item,arr)
+  {
+   var c,i,$1,l;
+   c=true;
+   i=0;
+   l=arr.length;
+   while(c&&i<l)
+    if(this.equals.apply(null,[arr[i],item]))
+     c=false;
+    else
+     i=i+1;
+   return!c;
+  },
+  ExceptWith:function(xs)
+  {
+   var e;
+   e=Enumerator.Get(xs);
+   try
+   {
+    while(e.MoveNext())
+     this.Remove(e.Current());
+   }
+   finally
+   {
+    if(typeof e=="object"&&"Dispose"in e)
+     e.Dispose();
+   }
+  },
+  get_Count:function()
+  {
+   return this.count;
+  },
+  CopyTo:function(arr)
+  {
+   var i,all,i$1,$1;
+   i=0;
+   all=HashSetUtil.concat(this.data);
+   for(i$1=0,$1=all.length-1;i$1<=$1;i$1++)Arrays.set(arr,i$1,all[i$1]);
+  },
+  IntersectWith:function(xs)
+  {
+   var other,all,i,$1,item;
+   other=new HashSet.New$4(xs,this.equals,this.hash);
+   all=HashSetUtil.concat(this.data);
+   for(i=0,$1=all.length-1;i<=$1;i++){
+    item=all[i];
+    !other.Contains(item)?this.Remove(item):void 0;
+   }
+  },
+  Remove:function(item)
+  {
+   var arr;
+   arr=this.data[this.hash(item)];
+   return arr==null?false:this.arrRemove(item,arr)&&(this.count=this.count-1,true);
+  },
+  arrRemove:function(item,arr)
+  {
+   var c,i,$1,l;
+   c=true;
+   i=0;
+   l=arr.length;
+   while(c&&i<l)
+    if(this.equals.apply(null,[arr[i],item]))
+     {
+      arr.splice.apply(arr,[i,1]);
+      c=false;
+     }
+    else
+     i=i+1;
+   return!c;
+  },
+  GetEnumerator:function()
+  {
+   return Enumerator.Get(HashSetUtil.concat(this.data));
+  },
+  GetEnumerator0:function()
+  {
+   return Enumerator.Get(HashSetUtil.concat(this.data));
+  }
+ },Obj,HashSet);
+ HashSet.New$3=Runtime$1.Ctor(function()
+ {
+  HashSet.New$4.call(this,[],Unchecked.Equals,Unchecked.Hash);
+ },HashSet);
+ HashSet.New$4=Runtime$1.Ctor(function(init,equals,hash)
+ {
+  var e;
+  Obj.New.call(this);
+  this.equals=equals;
+  this.hash=hash;
+  this.data=[];
+  this.count=0;
+  e=Enumerator.Get(init);
+  try
+  {
+   while(e.MoveNext())
+    this.add(e.Current());
+  }
+  finally
+  {
+   if(typeof e=="object"&&"Dispose"in e)
+    e.Dispose();
+  }
+ },HashSet);
+ HashSet.New$2=Runtime$1.Ctor(function(init)
+ {
+  HashSet.New$4.call(this,init,Unchecked.Equals,Unchecked.Hash);
+ },HashSet);
+ TemplateInitializer.$cctor=function()
+ {
+  TemplateInitializer.$cctor=Global.ignore;
+  TemplateInitializer.initialized=new Dictionary.New$5();
+ };
+ TemplateInitializer=Server.TemplateInitializer=Runtime$1.Class({},Obj,TemplateInitializer);
+ TemplateInitializer.GetOrAddHoleFor=function(id,holeName,initHole)
+ {
+  var d,m,o,h;
+  TemplateInitializer.$cctor();
+  d=TemplateInitializer.GetHolesFor(id);
+  m=(o=null,[d.TryGetValue(holeName,{
+   get:function()
+   {
+    return o;
+   },
+   set:function(v)
+   {
+    o=v;
+   }
+  }),o]);
+  return m[0]?m[1]:(h=initHole(),(d.set_Item(holeName,h),h));
+ };
+ TemplateInitializer.GetHolesFor=function(id)
+ {
+  var m,o,d;
+  TemplateInitializer.$cctor();
+  m=(o=null,[TemplateInitializer.initialized.TryGetValue(id,{
+   get:function()
+   {
+    return o;
+   },
+   set:function(v)
+   {
+    o=v;
+   }
+  }),o]);
+  return m[0]?m[1]:(d=new Dictionary.New$5(),(TemplateInitializer.initialized.set_Item(id,d),d));
+ };
+ Var$1=UI.Var$1=Runtime$1.Class({},Obj,Var$1);
+ Var$1.Create$1=function(v)
+ {
+  return new ConcreteVar.New(false,Snap.New({
+   $:2,
+   $0:v,
+   $1:[]
+  }),v);
+ };
+ JS.GetFieldValues=function(o)
+ {
+  var r,k;
+  r=[];
+  for(var k$1 in o)r.push(o[k$1]);
+  return r;
+ };
+ Enumerator.Get=function(x)
+ {
+  return x instanceof Global.Array?Enumerator.ArrayEnumerator(x):Unchecked.Equals(typeof x,"string")?Enumerator.StringEnumerator(x):x.GetEnumerator();
+ };
+ Enumerator.ArrayEnumerator=function(s)
+ {
+  return new T$1.New(0,null,function(e)
+  {
+   var i;
+   i=e.s;
+   return i<Arrays.length(s)&&(e.c=Arrays.get(s,i),e.s=i+1,true);
+  },void 0);
+ };
+ Enumerator.StringEnumerator=function(s)
+ {
+  return new T$1.New(0,null,function(e)
+  {
+   var i;
+   i=e.s;
+   return i<s.length&&(e.c=s[i],e.s=i+1,true);
+  },void 0);
+ };
+ Enumerator.Get0=function(x)
+ {
+  return x instanceof Global.Array?Enumerator.ArrayEnumerator(x):Unchecked.Equals(typeof x,"string")?Enumerator.StringEnumerator(x):"GetEnumerator0"in x?x.GetEnumerator0():x.GetEnumerator();
+ };
  DictionaryUtil.notPresent=function()
  {
   return Operators.FailWith("The given key was not present in the dictionary.");
  };
+ Scheduler=Concurrency.Scheduler=Runtime$1.Class({
+  Fork:function(action)
+  {
+   var $this;
+   $this=this;
+   this.robin.push(action);
+   this.idle?(this.idle=false,Global.setTimeout(function()
+   {
+    $this.tick();
+   },0)):void 0;
+  },
+  tick:function()
+  {
+   var loop,$this,t;
+   $this=this;
+   t=Date.now();
+   loop=true;
+   while(loop)
+    if(this.robin.length===0)
+     {
+      this.idle=true;
+      loop=false;
+     }
+    else
+     {
+      (this.robin.shift())();
+      Date.now()-t>40?(Global.setTimeout(function()
+      {
+       $this.tick();
+      },0),loop=false):void 0;
+     }
+  }
+ },Obj,Scheduler);
+ Scheduler.New=Runtime$1.Ctor(function()
+ {
+  Obj.New.call(this);
+  this.idle=true;
+  this.robin=[];
+ },Scheduler);
+ CancellationTokenSource=WebSharper.CancellationTokenSource=Runtime$1.Class({},Obj,CancellationTokenSource);
+ CancellationTokenSource.New=Runtime$1.Ctor(function()
+ {
+  Obj.New.call(this);
+  this.c=false;
+  this.pending=null;
+  this.r=[];
+  this.init=1;
+ },CancellationTokenSource);
  View.MapSeqCached=function(conv,view)
  {
   return View.MapSeqCachedBy(Global.id,conv,view);
@@ -3268,14 +3528,14 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
   };
   this.id=Fresh.Int();
  },ConcreteVar);
- SC$1.$cctor=function()
+ SC$2.$cctor=function()
  {
-  SC$1.$cctor=Global.ignore;
-  SC$1.LoadedTemplates=new Dictionary.New$5();
-  SC$1.LocalTemplatesLoaded=false;
-  SC$1.GlobalHoles=new Dictionary.New$5();
-  SC$1.TextHoleRE="\\${([^}]+)}";
-  SC$1.RenderedFullDocTemplate=null;
+  SC$2.$cctor=Global.ignore;
+  SC$2.LoadedTemplates=new Dictionary.New$5();
+  SC$2.LocalTemplatesLoaded=false;
+  SC$2.GlobalHoles=new Dictionary.New$5();
+  SC$2.TextHoleRE="\\${([^}]+)}";
+  SC$2.RenderedFullDocTemplate=null;
  };
  Docs.LinkElement=function(el,children)
  {
@@ -3610,72 +3870,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
   }),DomNodes.Except(DomNodes.DocChildren(el),DomNodes.Children(el.El,Runtime$1.GetOptional(el.Delimiters))));
   ins(el.Children,(m=Runtime$1.GetOptional(el.Delimiters),m!=null&&m.$==1?m.$0[1]:null));
  };
- Scheduler=Concurrency.Scheduler=Runtime$1.Class({
-  Fork:function(action)
-  {
-   var $this;
-   $this=this;
-   this.robin.push(action);
-   this.idle?(this.idle=false,Global.setTimeout(function()
-   {
-    $this.tick();
-   },0)):void 0;
-  },
-  tick:function()
-  {
-   var loop,$this,t;
-   $this=this;
-   t=Date.now();
-   loop=true;
-   while(loop)
-    if(this.robin.length===0)
-     {
-      this.idle=true;
-      loop=false;
-     }
-    else
-     {
-      (this.robin.shift())();
-      Date.now()-t>40?(Global.setTimeout(function()
-      {
-       $this.tick();
-      },0),loop=false):void 0;
-     }
-  }
- },Obj,Scheduler);
- Scheduler.New=Runtime$1.Ctor(function()
- {
-  Obj.New.call(this);
-  this.idle=true;
-  this.robin=[];
- },Scheduler);
- SC$2.$cctor=function()
- {
-  SC$2.$cctor=Global.ignore;
-  SC$2.noneCT=CT.New(false,[]);
-  SC$2.scheduler=new Scheduler.New();
-  SC$2.defCTS=[new CancellationTokenSource.New()];
-  SC$2.Zero=Concurrency.Return();
-  SC$2.GetCT=function(c)
-  {
-   c.k({
-    $:0,
-    $0:c.ct
-   });
-  };
- };
- List.head=function(l)
- {
-  return l.$==1?l.$0:List.listEmpty();
- };
- List.tail=function(l)
- {
-  return l.$==1?l.$1:List.listEmpty();
- };
- List.listEmpty=function()
- {
-  return Operators.FailWith("The input list was empty.");
- };
  DocElemNode=UI.DocElemNode=Runtime$1.Class({
   Equals:function(o)
   {
@@ -3696,6 +3890,18 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    ElKey:ElKey
   },(Runtime$1.SetOptional($1,"Delimiters",Delimiters),Runtime$1.SetOptional($1,"Render",Render),$1)));
  };
+ OperationCanceledException=WebSharper.OperationCanceledException=Runtime$1.Class({},Error,OperationCanceledException);
+ OperationCanceledException.New=Runtime$1.Ctor(function(ct)
+ {
+  OperationCanceledException.New$1.call(this,"The operation was canceled.",null,ct);
+ },OperationCanceledException);
+ OperationCanceledException.New$1=Runtime$1.Ctor(function(message,inner,ct)
+ {
+  this.message=message;
+  this.inner=inner;
+  Object.setPrototypeOf(this,OperationCanceledException.prototype);
+  this.ct=ct;
+ },OperationCanceledException);
  Fresh.Int=function()
  {
   Fresh.set_counter(Fresh.counter()+1);
@@ -4141,27 +4347,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    m===0?(st[0]=1,Concurrency.Start(work(),null)):m===1?st[0]=2:void 0;
   };
  };
- OperationCanceledException=WebSharper.OperationCanceledException=Runtime$1.Class({},Error,OperationCanceledException);
- OperationCanceledException.New=Runtime$1.Ctor(function(ct)
- {
-  OperationCanceledException.New$1.call(this,"The operation was canceled.",null,ct);
- },OperationCanceledException);
- OperationCanceledException.New$1=Runtime$1.Ctor(function(message,inner,ct)
- {
-  this.message=message;
-  this.inner=inner;
-  Object.setPrototypeOf(this,OperationCanceledException.prototype);
-  this.ct=ct;
- },OperationCanceledException);
- CancellationTokenSource=WebSharper.CancellationTokenSource=Runtime$1.Class({},Obj,CancellationTokenSource);
- CancellationTokenSource.New=Runtime$1.Ctor(function()
- {
-  Obj.New.call(this);
-  this.c=false;
-  this.pending=null;
-  this.r=[];
-  this.init=1;
- },CancellationTokenSource);
  Dyn.New=function(DynElem,DynFlags,DynNodes,OnAfterRender)
  {
   var $1;
@@ -4459,41 +4644,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  AttrModule.DynamicCustom=function(set,view)
  {
   return Attrs$1.Dynamic(view,set);
- };
- Strings.concat=function(separator,strings)
- {
-  return Arrays.ofSeq(strings).join(separator);
- };
- Strings.SplitChars=function(s,sep,opts)
- {
-  return Strings.Split(s,new Global.RegExp("["+Strings.RegexEscape(sep.join(""))+"]"),opts);
- };
- Strings.StartsWith=function(t,s)
- {
-  return t.substring(0,s.length)==s;
- };
- Strings.Split=function(s,pat,opts)
- {
-  return opts===1?Arrays.filter(function(x)
-  {
-   return x!=="";
-  },Strings.SplitWith(s,pat)):Strings.SplitWith(s,pat);
- };
- Strings.RegexEscape=function(s)
- {
-  return s.replace(new Global.RegExp("[-\\/\\\\^$*+?.()|[\\]{}]","g"),"\\$&");
- };
- Strings.SplitWith=function(str,pat)
- {
-  return str.split(pat);
- };
- Strings.forall=function(f,s)
- {
-  return Seq.forall(f,Strings.protect(s));
- };
- Strings.protect=function(s)
- {
-  return s===null?"":s;
  };
  Updates=UI.Updates=Runtime$1.Class({},null,Updates);
  Updates.Create=function(v)
