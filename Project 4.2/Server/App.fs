@@ -7,21 +7,19 @@ open WebSharper.Sitelets
 
 open System.Text.RegularExpressions
 
-/// The types used by this application.
+// The message types for request and response
 module Model =
 
-    //
     type User = {
         id: int
         username: string
         password: string
     }
 
-    type Subscribe = {
+    type Subscribe = { // subscriber subscribes to a publisher
         publisher: string
         subscriber: string
     }
-
     type Tweet = {
         id: string
         reId: string
@@ -30,48 +28,32 @@ module Model =
         by: string
     }
 
-    type QueryTweet = {
-        qType: string
-        qName: string
-        by: string
+    type QueryTweet = { // search for tweets
+        qType: string // "subscription" | "hashtag" | "mention"
+        qName: string // "" | "#tag_name" | "@username"
+        by: string // user who is querying
     }
 
-    /// The type of REST API endpoints.
-    /// This defines the set of requests accepted by our API.
+    // API Endpoints
     type ApiEndPoint =
 
-        // Accepts POST requests to /usersMap with User as JSON body
-        | [<EndPoint "POST /users"; Json "User">]
+        // For User
+        | [<EndPoint "POST /users"; Json "User">] // Register
             CreateUser of User: User
 
         | [<EndPoint "POST /users/login"; Json "User">]
             LoginUser of User: User
 
-        /// Accepts GET requests to /usersMap
-        // | [<EndPoint "GET /usersMap">]
-            // GetPeople
-
-        /// Accepts GET requests to /usersMap/{id}
-        | [<EndPoint "GET /users">]
-            GetUser of username: string
         | [<EndPoint "POST /users/subscribe"; Json "Subscribe">]
             SubscribeTo of Subscribe: Subscribe
 
-        /// Accepts PUT requests to /usersMap with User as JSON body
-        // | [<EndPoint "PUT /usersMap"; Json "User">]
-            // EditPerson of User: User
-
-        /// Accepts DELETE requests to /usersMap/{id}
-        // | [<EndPoint "DELETE /usersMap">]
-        //     DeletePerson of id: int
-        
         // For Tweets 
-        | [<EndPoint "POST /tweets"; Json "Tweet">]
+        | [<EndPoint "POST /tweets"; Json "Tweet">] // post tweet
             CreateTweet of Tweet: Tweet
-        | [<EndPoint "POST /tweets/search"; Json "QueryTweet">]
+        | [<EndPoint "POST /tweets/search"; Json "QueryTweet">] // search tweets
             QueryTweet of QueryTweet: QueryTweet
 
-    /// The type of all endpoints for the application.
+    // The type of all endpoints for the application.
     type EndPoint =
         // Accepts requests to /
         | [<EndPoint "/">] Home
@@ -82,15 +64,12 @@ module Model =
     /// Error result value.
     type Error = { error : string }
 
-    /// Alias representing the success or failure of an operation.
-    /// The Ok case contains a success value to return as JSON.
-    /// The Error case contains an HTTP status and a JSON error to return.
+    // generic response type
     type ApiResult<'T> = Result<'T, Http.Status * Error>
 
-    /// Result value for CreateUser.
-    type Id = { id : string }
-
+    type Id = { id : string } // to return id as response
 open Model
+
 
 module Utils =
     let getRandomString n = // generate random alphnumeric string of length n
@@ -110,11 +89,9 @@ module Utils =
         match tweet with
         | Regex regex tags -> tags
         | _ -> []
-
 open Utils
 
-/// This module implements the back-end of the application.
-/// It's a CRUD application maintaining a basic in-memory database of usersMap.
+// in memory database
 module Backend =
 
     let private usersMap = new Dictionary<string, User>()
@@ -127,9 +104,8 @@ module Backend =
     let private subscribersMap = new Dictionary<string,  List<string>>()
 
     let maxLenTweetId = 3
-    /// The highest id used so far, incremented each time a person is POSTed.
-    // let private lastId = ref 0
 
+    // Error responses
     let userNotFound() : ApiResult<'T> =
         Error (Http.Status.NotFound, { error = "Please register first" })
     
@@ -141,13 +117,6 @@ module Backend =
     
     let userAlreadySubscribed() : ApiResult<'T> =
         Error (Http.Status.NotFound, { error = "User already subscribed" })
-
-    // let GetPeople () : ApiResult<User[]> =
-    //     lock usersMap <| fun () ->
-    //         usersMap
-    //         |> Seq.map (fun (KeyValue(_, person)) -> person)
-    //         |> Array.ofSeq
-    //         |> Ok
 
     // Create User
     let CreateUser (data: User) : ApiResult<Id> =
@@ -249,52 +218,14 @@ module Backend =
             for tweetId in tweetsByMention.GetValueOrDefault(mention, new List<string>()) do
                 response.Add(tweetsMap.[tweetId])
         response.ToArray () |> Ok
-        // pushTweet retweet # TODO
      
 
-    // let EditPerson (data: User) : ApiResult<Id> =
-    //     lock usersMap <| fun () ->
-    //         match usersMap.TryGetValue(data.id) with
-    //         | true, _ ->
-    //             usersMap.[data.id] <- data
-    //             Ok { id = data.id }
-    //         | false, _ -> personNotFound()
-
-    // let DeletePerson (id: int) : ApiResult<Id> =
-    //     lock usersMap <| fun () ->
-    //         match usersMap.TryGetValue(id) with
-    //         | true, _ ->
-    //             usersMap.Remove(id) |> ignore
-    //             Ok { id = id }
-    //         | false, _ -> personNotFound()
-
-    // On application startup, pre-fill the database with a few usersMap.
-    // do List.iter (CreateUser >> ignore) [
-    //     { id = 0
-    //       username = "Alonzo"
-    //       password = "Church"
-    //     }
-    //     { id = 0
-    //       username = "Alan"
-    //       password = "Turing"
-    //     }
-    //     { id = 0
-    //       username = "Bertrand"
-    //       password = "Russell"
-    //     }
-    //     { id = 0
-    //       username = "Noam"
-    //       password = "Chomsky"
-    //     }
-    // ]
-
-/// The server side website, tying everything together.
 module Site =
     open WebSharper.UI
     open WebSharper.UI.Html
     open WebSharper.UI.Server
 
-    /// Helper function to convert our internal ApiResult type into WebSharper Content.
+    // to convert ApiResult type into WebSharper Content type
     let JsonContent (result: ApiResult<'T>) : Async<Content<EndPoint>> =
         match result with
         | Ok value ->
@@ -304,24 +235,15 @@ module Site =
             |> Content.SetStatus status
         |> Content.WithContentType "application/json"
 
-    /// Respond to an ApiEndPoint by calling the corresponding backend function
-    /// and converting the result into Content.
+    // respond to an API endpoint
     let ApiContent (ep: ApiEndPoint) : Async<Content<EndPoint>> =
         match ep with
-        // | GetPeople ->
-            // JsonContent (Backend.GetPeople ())
-        // | GetUser username ->
-            // JsonContent (Backend.GetUser username)
         | CreateUser user ->
             JsonContent (Backend.CreateUser user)
         | LoginUser user ->
             JsonContent (Backend.LoginUser user)
         | SubscribeTo subscribe ->
             JsonContent (Backend.SubscribeTo subscribe)
-        // | EditPerson User ->
-            // JsonContent (Backend.EditPerson User)
-        // | DeletePerson id ->
-            // JsonContent (Backend.DeletePerson id)
         | CreateTweet tweet ->
             JsonContent (Backend.CreateTweet tweet)
         | QueryTweet query ->
@@ -329,20 +251,13 @@ module Site =
 
     // A simple HTML home page.
     let HomePage (ctx: Context<EndPoint>) : Async<Content<EndPoint>> =
-        // Type-safely creates the URI: "/api/usersMap/1"
-        let user1Link = ctx.Link (Api (Cors.Of (GetUser "Alonzo")))
         Content.Page(
             Body = [
                 p [] [text "API is running."]
-                p [] [
-                    text "Try querying: "
-                    a [attr.href user1Link] [text user1Link]
-                ]
             ]
         )
 
-    /// The Sitelet parses requests into EndPoint values
-    /// and dispatches them to the content function.
+    // to parse requests into EndPoints
     let Main corsAllowedOrigins : Sitelet<EndPoint> =
         Application.MultiPage (fun ctx endpoint ->
             match endpoint with
