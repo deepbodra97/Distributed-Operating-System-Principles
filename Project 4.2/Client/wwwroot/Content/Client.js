@@ -498,6 +498,8 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    b$1=null;
    return Concurrency.Delay(function()
    {
+    tweets.Clear();
+    feeds.Clear();
     return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/users",JSON.stringify(((Provider.Id())())(user))),function(a$1)
     {
      mUser=user;
@@ -518,6 +520,8 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    b$1=null;
    return Concurrency.Delay(function()
    {
+    tweets.Clear();
+    feeds.Clear();
     return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/users/login",JSON.stringify(((Provider.Id())())(user))),function(a$1)
     {
      mUser=user;
@@ -535,15 +539,14 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    {
     console.log(s);
    }));
-   Concurrency.Start((b$1=null,Concurrency.Delay(function()
+   b$1=null;
+   return Concurrency.Delay(function()
    {
     return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/users/subscribe",JSON.stringify(((Provider.Id())())(subscribe))),function(a$1)
     {
-     Provider.Id();
-     JSON.parse(a$1);
-     return Concurrency.Return(null);
+     return Concurrency.Return(((Provider.Id())())(JSON.parse(a$1)));
     });
-   })),null);
+   });
   }
   function postTweet(tweet)
   {
@@ -561,6 +564,25 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
     return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/tweets",JSON.stringify(((Provider.Id())())(tweet))),function(a$1)
     {
      return Concurrency.Return(((Provider.Id())())(JSON.parse(a$1)));
+    });
+   });
+  }
+  function searchTweets(query)
+  {
+   var b$1;
+   (function($1)
+   {
+    return $1("Sending query to server");
+   }(function(s)
+   {
+    console.log(s);
+   }));
+   b$1=null;
+   return Concurrency.Delay(function()
+   {
+    return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/tweets/search",JSON.stringify(((Provider.Id())())(query))),function(a$1)
+    {
+     return Concurrency.Return(((Provider.DecodeList(Provider.Id()))())(JSON.parse(a$1)));
     });
    });
   }
@@ -583,25 +605,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    return Concurrency.Delay(function()
    {
     return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/tweets/search",JSON.stringify(((Provider.Id())())(query$1))),function(a$1)
-    {
-     return Concurrency.Return(((Provider.DecodeList(Provider.Id()))())(JSON.parse(a$1)));
-    });
-   });
-  }
-  function searchTweets(query)
-  {
-   var b$1;
-   (function($1)
-   {
-    return $1("Sending query to server");
-   }(function(s)
-   {
-    console.log(s);
-   }));
-   b$1=null;
-   return Concurrency.Delay(function()
-   {
-    return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/tweets/search",JSON.stringify(((Provider.Id())())(query))),function(a$1)
     {
      return Concurrency.Return(((Provider.DecodeList(Provider.Id()))())(JSON.parse(a$1)));
     });
@@ -660,8 +663,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
       });
      })),null);
     }
-   else
-    InfoText.Set("Please login first");
   },3000);
   Global.setInterval(function()
   {
@@ -702,8 +703,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
       });
      })),null);
     }
-   else
-    InfoText.Set("Please login first");
   },3000);
   a=(b=(F=Doc.Convert(function(tweet)
   {
@@ -756,7 +755,7 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
       {
        console.log(s);
       }))(a$1.message));
-      InfoText.Set("Your tweet wasn't posted");
+      InfoText.Set(getErrorMessage(a$1.message));
       return Concurrency.Zero();
      });
     })),null);
@@ -812,7 +811,7 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
       {
        console.log(s);
       }))(a$1.message));
-      InfoText.Set("Your tweet wasn't posted");
+      InfoText.Set(getErrorMessage(a$1.message));
       return Concurrency.Zero();
      });
     })),null);
@@ -936,10 +935,55 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    return t$2.i;
   },function(t$5)
   {
-   subscribeTo({
-    publisher:t$5.Vars.Hole("publisher").$1.Get(),
-    subscriber:mUser.username
-   });
+   var newSubscribe,b$1;
+   if(Unchecked.Equals(mUser,null))
+    InfoText.Set("Please login/register");
+   else
+    if(t$5.Vars.Hole("publisher").$1.Get()==="")
+     InfoText.Set("Field cannot be left blank");
+    else
+     {
+      newSubscribe={
+       publisher:t$5.Vars.Hole("publisher").$1.Get(),
+       subscriber:mUser.username
+      };
+      Concurrency.Start((b$1=null,Concurrency.Delay(function()
+      {
+       return Concurrency.TryWith(Concurrency.Delay(function()
+       {
+        return Concurrency.Bind(subscribeTo(newSubscribe),function(a$1)
+        {
+         InfoText.Set("You subscribed to "+t$5.Vars.Hole("publisher").$1.Get());
+         ((function($1)
+         {
+          return function($2)
+          {
+           return $1("response="+GeneratedPrintf.p($2));
+          };
+         }(function(s)
+         {
+          console.log(s);
+         }))(a$1));
+         return Concurrency.Zero();
+        });
+       }),function(a$1)
+       {
+        ((function($1)
+        {
+         return function($2)
+         {
+          return $1("Exception Caught: "+Utils.toSafe($2));
+         };
+        }(function(s)
+        {
+         console.log(s);
+        }))(a$1.message));
+        InfoText.Set(getErrorMessage(a$1.message));
+        return Concurrency.Zero();
+       });
+      })),null);
+      t$5.Vars.Hole("publisher").$1.Set("");
+     }
   })),t$2)),(t$1.h.push(Handler.EventQ2(t$1.k,"ontweet",function()
   {
    return t$1.i;
@@ -991,7 +1035,7 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
         {
          console.log(s);
         }))(a$1.message));
-        InfoText.Set("Your tweet wasn't posted");
+        InfoText.Set(getErrorMessage(a$1.message));
         return Concurrency.Zero();
        });
       })),null);
@@ -1300,73 +1344,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  T.Empty=new T({
   $:0
  });
- ListModel=UI.ListModel=Runtime$1.Class({
-  Clear:function()
-  {
-   this["var"].Set(this.storage.SSet([]));
-   this.ObsoleteAll();
-  },
-  Append:function(item)
-  {
-   var $this,v,t,m;
-   $this=this;
-   v=this["var"].Get();
-   t=this.key(item);
-   m=Arrays.tryFindIndex(function(it)
-   {
-    return Unchecked.Equals($this.key(it),t);
-   },v);
-   m!=null&&m.$==1?this["var"].Set(this.storage.SSetAt(m.$0,item,v)):this["var"].Set(this.storage.SAppend(item,v));
-   this.ObsoleteKey(t);
-  },
-  ObsoleteAll:function()
-  {
-   Seq.iter(function(ksn)
-   {
-    Snap.Obsolete(ksn.V);
-   },this.it);
-   this.it.Clear();
-  },
-  ObsoleteKey:function(key)
-  {
-   var m,o;
-   m=(o=null,[this.it.TryGetValue(key,{
-    get:function()
-    {
-     return o;
-    },
-    set:function(v)
-    {
-     o=v;
-    }
-   }),o]);
-   m[0]?(Snap.Obsolete(m[1]),this.it.Remove(key)):void 0;
-  },
-  GetEnumerator:function()
-  {
-   return Enumerator.Get(this["var"].Get());
-  },
-  GetEnumerator0:function()
-  {
-   return Enumerator.Get0(this["var"].Get());
-  }
- },Obj,ListModel);
- ListModel.New=Runtime$1.Ctor(function(key,storage)
- {
-  ListModel.New$3.call(this,key,Var$1.Create$1(Arrays.ofSeq(Seq.distinctBy(key,storage.SInit()))),storage);
- },ListModel);
- ListModel.New$3=Runtime$1.Ctor(function(key,_var,storage)
- {
-  Obj.New.call(this);
-  this.key=key;
-  this["var"]=_var;
-  this.storage=storage;
-  this.v=View.Map(function(x)
-  {
-   return x.slice();
-  },this["var"].get_View());
-  this.it=new Dictionary.New$5();
- },ListModel);
  Provider.Id=Runtime$1.Curried3(function($1,$2,x)
  {
   return x;
@@ -1439,6 +1416,73 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  {
   return Operators.FailWith("The input list was empty.");
  };
+ ListModel=UI.ListModel=Runtime$1.Class({
+  Clear:function()
+  {
+   this["var"].Set(this.storage.SSet([]));
+   this.ObsoleteAll();
+  },
+  Append:function(item)
+  {
+   var $this,v,t,m;
+   $this=this;
+   v=this["var"].Get();
+   t=this.key(item);
+   m=Arrays.tryFindIndex(function(it)
+   {
+    return Unchecked.Equals($this.key(it),t);
+   },v);
+   m!=null&&m.$==1?this["var"].Set(this.storage.SSetAt(m.$0,item,v)):this["var"].Set(this.storage.SAppend(item,v));
+   this.ObsoleteKey(t);
+  },
+  ObsoleteAll:function()
+  {
+   Seq.iter(function(ksn)
+   {
+    Snap.Obsolete(ksn.V);
+   },this.it);
+   this.it.Clear();
+  },
+  ObsoleteKey:function(key)
+  {
+   var m,o;
+   m=(o=null,[this.it.TryGetValue(key,{
+    get:function()
+    {
+     return o;
+    },
+    set:function(v)
+    {
+     o=v;
+    }
+   }),o]);
+   m[0]?(Snap.Obsolete(m[1]),this.it.Remove(key)):void 0;
+  },
+  GetEnumerator:function()
+  {
+   return Enumerator.Get(this["var"].Get());
+  },
+  GetEnumerator0:function()
+  {
+   return Enumerator.Get0(this["var"].Get());
+  }
+ },Obj,ListModel);
+ ListModel.New=Runtime$1.Ctor(function(key,storage)
+ {
+  ListModel.New$3.call(this,key,Var$1.Create$1(Arrays.ofSeq(Seq.distinctBy(key,storage.SInit()))),storage);
+ },ListModel);
+ ListModel.New$3=Runtime$1.Ctor(function(key,_var,storage)
+ {
+  Obj.New.call(this);
+  this.key=key;
+  this["var"]=_var;
+  this.storage=storage;
+  this.v=View.Map(function(x)
+  {
+   return x.slice();
+  },this["var"].get_View());
+  this.it=new Dictionary.New$5();
+ },ListModel);
  Utils.toSafe=function(s)
  {
   return s==null?"":s;
@@ -3493,6 +3537,14 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
      }
     }
  };
+ Arrays.init=function(size,f)
+ {
+  var r,i,$1;
+  size<0?Operators.FailWith("Negative size given."):null;
+  r=new Global.Array(size);
+  for(i=0,$1=size-1;i<=$1;i++)r[i]=f(i);
+  return r;
+ };
  Arrays.tryFindIndex=function(f,arr)
  {
   var res,i;
@@ -3507,14 +3559,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
     i=i+1;
    }
   return res;
- };
- Arrays.init=function(size,f)
- {
-  var r,i,$1;
-  size<0?Operators.FailWith("Negative size given."):null;
-  r=new Global.Array(size);
-  for(i=0,$1=size-1;i<=$1;i++)r[i]=f(i);
-  return r;
  };
  Arrays.map=function(f,arr)
  {
@@ -3622,6 +3666,13 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
   for(i=0,$1=size-1;i<=$1;i++)r[i]=value;
   return r;
  };
+ AsyncBody.New=function(k,ct)
+ {
+  return{
+   k:k,
+   ct:ct
+  };
+ };
  View=UI.View=Runtime$1.Class({},null,View);
  Snap.Obsolete=function(sn)
  {
@@ -3645,13 +3696,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  {
   return{
    s:State
-  };
- };
- AsyncBody.New=function(k,ct)
- {
-  return{
-   k:k,
-   ct:ct
   };
  };
  SC$1.$cctor=function()

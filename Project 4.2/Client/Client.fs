@@ -5,19 +5,19 @@ open WebSharper.UI.Client
 open WebSharper.UI.Templating
 
 module Model =
-
-    type User = {
+    // Message types for Request and Response
+    type User = { // User
         id: int
         username: string
         password: string
     }
 
-    type Subscribe = {
+    type Subscribe = { // subscriber subscribes to a publisher
         publisher: string
         subscriber: string
     }
 
-    type Tweet = {
+    type Tweet = { // tweet
         id: string
         reId: string
         text: string
@@ -25,14 +25,14 @@ module Model =
         by: string
     }
 
-    type QueryTweet = {
-        qType: string
-        qName: string
-        by: string
+    type QueryTweet = { // search for tweets
+        qType: string // "subscription" | "hashtag" | "mention"
+        qName: string // "" | "#tag_name" | "@username"
+        by: string // user who is querying
     }
 
     type Id = { id : string }
-    type Error = { error : string }
+    type Error = { error : string } // error type
 open Model
 
 
@@ -41,8 +41,9 @@ module Client =
     open WebSharper.JQuery
     open WebSharper.JavaScript
 
-    type IndexTemplate = Template<"wwwroot/index.html", ClientLoad.FromDocument>
+    type IndexTemplate = Template<"wwwroot/index.html", ClientLoad.FromDocument> // load html template
 
+    // To make calls to the API
     let Ajax (method: string) (url: string) (serializedData: string) : Async<string> =
             Async.FromContinuations <| fun (ok, ko, _) ->
             JQuery.Ajax (    
@@ -62,13 +63,20 @@ module Client =
 
         let mutable mUser = Unchecked.defaultof<User>
 
-        let InfoText = Var.Create ""
+        let InfoText = Var.Create "" // to display any error or success information
+        let tweets : ListModel<string, Tweet> = // load tweets dynamically. reactive webpage
+            ListModel.Create (fun tweet -> tweet.id) []
+        
+        let feeds : ListModel<string, Tweet> = // load feeds dynamically. reactive webpage
+            ListModel.Create (fun tweet -> tweet.id) []
 
         // User
         // Register
         let registerUser (user: User): Id Async =
             printfn "Sending registration request to server"    
             async {
+                tweets.Clear()
+                feeds.Clear()
                 let! response = Ajax "POST" "http://localhost:5000/api/users" (Json.Serialize user)
                 mUser <- user
                 return Json.Deserialize<Id> response
@@ -78,41 +86,27 @@ module Client =
         let loginUser (user: User): Id Async =
             printfn "Sending login request to server"
             async {
+                tweets.Clear()
+                feeds.Clear()
                 let! response = Ajax "POST" "http://localhost:5000/api/users/login" (Json.Serialize user)
                 mUser <- user
                 return Json.Deserialize<Id> response
             }
 
         // Subscribe
-        let subscribeTo (subscribe: Subscribe) =
+        let subscribeTo (subscribe: Subscribe) : Id Async =
             printfn "Sending subscription request to server"
             async {
                 let! response = Ajax "POST" "http://localhost:5000/api/users/subscribe" (Json.Serialize subscribe)
-                return Json.Deserialize response
-            } |> Async.Start
+                return Json.Deserialize<Id> response
+            }
 
-        let tweets : ListModel<string, Tweet> = 
-            ListModel.Create (fun tweet -> tweet.id) []
-        
-        let feeds : ListModel<string, Tweet> = 
-            ListModel.Create (fun tweet -> tweet.id) []
-        
-        let addTweet (tweet: Tweet) =
-            tweets.Add(tweet)
-        
+        // async tasks for ajax calls
         let postTweet (tweet: Tweet) : Id Async=
             printfn "Sending tweet to server"
             async {
                 let! response = Ajax "POST" "http://localhost:5000/api/tweets" (Json.Serialize tweet)
                 return Json.Deserialize<Id> response
-            }
-
-        let getFeeds query =
-            printfn "Requesting feeds"
-            let query = {qType="subscription"; qName=""; by=mUser.username}
-            async {
-                let! response = Ajax "POST" "http://localhost:5000/api/tweets/search" (Json.Serialize query)
-                return Json.Deserialize<Tweet list> response
             }
 
         let searchTweets (query: QueryTweet): Tweet list Async =
@@ -121,11 +115,19 @@ module Client =
                 let! response = Ajax "POST" "http://localhost:5000/api/tweets/search" (Json.Serialize query)
                 return Json.Deserialize<Tweet list> response
             }
+        
+        let getFeeds query =
+            printfn "Requesting feeds"
+            let query = {qType="subscription"; qName=""; by=mUser.username}
+            async {
+                let! response = Ajax "POST" "http://localhost:5000/api/tweets/search" (Json.Serialize query)
+                return Json.Deserialize<Tweet list> response
+            }
 
         let getErrorMessage (error: string) =
             error.Replace("{\"error\":\"", "").Replace("\"}", "")
 
-        JS.SetInterval (fun ()-> 
+        JS.SetInterval (fun ()-> // fetches subscription in real time
             if mUser <> Unchecked.defaultof<User> then
                 let query = {qType="subscription"; qName=""; by=mUser.username}
                 async {
@@ -136,11 +138,9 @@ module Client =
                         printfn "Exception Caught: %s" error.Message
                         InfoText.Value <- (getErrorMessage error.Message)
                 }  |> Async.Start
-            else
-                InfoText.Value <- "Please login first"
         ) 3000 |> ignore
 
-        JS.SetInterval (fun ()-> 
+        JS.SetInterval (fun ()-> // fetches mentions in real time
             if mUser <> Unchecked.defaultof<User> then
                 let query = {qType="mention"; qName="@"+mUser.username; by=mUser.username}
                 async {
@@ -151,15 +151,13 @@ module Client =
                         printfn "Exception Caught: %s" error.Message
                         InfoText.Value <- (getErrorMessage error.Message)
                 }  |> Async.Start
-            else
-                InfoText.Value <- "Please login first"
         ) 3000 |> ignore
 
         IndexTemplate.Main()
             .Info(
-                View.Map id InfoText.View
+                View.Map id InfoText.View // binds the F# variable to the dom element
             )
-            .OnRegister(fun t->
+            .OnRegister(fun t-> // Register
                 if t.Vars.RegUsername.Value = "" || t.Vars.RegPassword.Value = "" || t.Vars.RegConfirmPassword.Value = "" then
                     InfoText.Value <- "Fields cannot be left empty"
                 else if t.Vars.RegPassword.Value <> t.Vars.RegConfirmPassword.Value then
@@ -179,7 +177,7 @@ module Client =
                     t.Vars.RegPassword.Value <- ""
                     t.Vars.RegConfirmPassword.Value <- ""
             )
-            .OnLogin(fun t->
+            .OnLogin(fun t-> // Login
                 if t.Vars.LogUsername.Value = "" || t.Vars.LogPassword.Value = "" then do
                     InfoText.Value <- "Fields cannot be left empty"
                 else
@@ -197,8 +195,23 @@ module Client =
                     t.Vars.LogPassword.Value <- ""
             )
             .OnSubscribe(fun t->
-                let newSubscribe = {publisher=t.Vars.Publisher.Value; subscriber=mUser.username}
-                subscribeTo newSubscribe
+                if mUser = Unchecked.defaultof<User> then
+                    InfoText.Value <- "Please login/register"
+                else if t.Vars.Publisher.Value = "" then
+                    InfoText.Value <- "Field cannot be left blank"
+                else
+                    let newSubscribe = {publisher=t.Vars.Publisher.Value; subscriber=mUser.username}
+                    async {
+                        try    
+                            let! response = subscribeTo newSubscribe
+                            InfoText.Value <- "You subscribed to " + t.Vars.Publisher.Value
+                            printfn "response=%A" response
+                        with error ->
+                            printfn "Exception Caught: %s" error.Message
+                            InfoText.Value <- getErrorMessage error.Message                        
+                    }  |> Async.Start               
+                    t.Vars.Publisher.Value <- ""    
+                    
             )
             .OnTweet(fun t ->
                 if mUser = Unchecked.defaultof<User> then
@@ -214,11 +227,11 @@ module Client =
                             printfn "response=%A" response
                         with error ->
                             printfn "Exception Caught: %s" error.Message
-                            InfoText.Value <- "Your tweet wasn't posted"                        
+                            InfoText.Value <- getErrorMessage error.Message                        
                     }  |> Async.Start               
                     t.Vars.TweetText.Value <- ""     
             )
-            .OnSearch(fun t ->
+            .OnSearch(fun t -> // query for tweets
                 tweets.Clear()
                 let qName = t.Vars.QueryName.Value
                 let newQuery =
@@ -233,7 +246,7 @@ module Client =
                     response |> List.iter tweets.Add
                 }  |> Async.Start
             )
-            .QueryResults(
+            .QueryResults( // update the result of the query
                 tweets.View.DocSeqCached(fun (tweet: Tweet) ->
                     let retweet = {id=""; reId=tweet.id; text=""; tType="retweet"; by=mUser.username}
                     IndexTemplate.Tweet()
@@ -246,12 +259,12 @@ module Client =
                                     printfn "response=%A" response
                                 with error ->
                                     printfn "Exception Caught: %s" error.Message
-                                    InfoText.Value <- "Your tweet wasn't posted"                        
+                                    InfoText.Value <- getErrorMessage error.Message                        
                             }  |> Async.Start
                     ).Doc()
                 )
             )
-            .Feeds(
+            .Feeds( // update the feed section
                 feeds.View.DocSeqCached(fun (tweet: Tweet) ->
                     let retweet = {id=""; reId=tweet.id; text=""; tType="retweet"; by=mUser.username}
                     IndexTemplate.Feed()
@@ -264,7 +277,7 @@ module Client =
                                     printfn "response=%A" response
                                 with error ->
                                     printfn "Exception Caught: %s" error.Message
-                                    InfoText.Value <- "Your tweet wasn't posted"                        
+                                    InfoText.Value <- getErrorMessage error.Message                        
                             }  |> Async.Start
                     ).Doc()
                 )    
