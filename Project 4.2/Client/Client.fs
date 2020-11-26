@@ -1,15 +1,11 @@
 namespace Client
-// open ClientServer
 open WebSharper
-// open WebSharper.JavaScript
-// open WebSharper.JQuery
 open WebSharper.UI
 open WebSharper.UI.Client
 open WebSharper.UI.Templating
 
 module Model =
 
-    //
     type User = {
         id: int
         username: string
@@ -61,16 +57,6 @@ module Client =
                 )
             ) |> ignore
 
-    // let PostBlogArticle (article: Tweet) : Async<int> =
-    //     async { let! response = Ajax "POST" "http://localhost:5000/api/tweets" article
-    //             return Json.Deserialize<int> response }
-
-    // let tweet = {id=""; reId=""; text="client"; tType="tweet"; by="deep"}
-    // let response = PostBlogArticle tweet
-    // printfn "response=%A" response
-
-    // let Register =
-
     [<SPAEntryPoint>]
     let Main () =
 
@@ -108,6 +94,9 @@ module Client =
         let tweets : ListModel<string, Tweet> = 
             ListModel.Create (fun tweet -> tweet.id) []
         
+        let feeds : ListModel<string, Tweet> = 
+            ListModel.Create (fun tweet -> tweet.id) []
+        
         let addTweet (tweet: Tweet) =
             tweets.Add(tweet)
         
@@ -116,6 +105,14 @@ module Client =
             async {
                 let! response = Ajax "POST" "http://localhost:5000/api/tweets" (Json.Serialize tweet)
                 return Json.Deserialize<Id> response
+            }
+
+        let getFeeds query =
+            printfn "Requesting feeds"
+            let query = {qType="subscription"; qName=""; by=mUser.username}
+            async {
+                let! response = Ajax "POST" "http://localhost:5000/api/tweets/search" (Json.Serialize query)
+                return Json.Deserialize<Tweet list> response
             }
 
         let searchTweets (query: QueryTweet): Tweet list Async =
@@ -127,6 +124,36 @@ module Client =
 
         let getErrorMessage (error: string) =
             error.Replace("{\"error\":\"", "").Replace("\"}", "")
+
+        JS.SetInterval (fun ()-> 
+            if mUser <> Unchecked.defaultof<User> then
+                let query = {qType="subscription"; qName=""; by=mUser.username}
+                async {
+                    try    
+                        let! response = getFeeds query
+                        response |> List.iter feeds.Add
+                    with error ->
+                        printfn "Exception Caught: %s" error.Message
+                        InfoText.Value <- (getErrorMessage error.Message)
+                }  |> Async.Start
+            else
+                InfoText.Value <- "Please login first"
+        ) 3000 |> ignore
+
+        JS.SetInterval (fun ()-> 
+            if mUser <> Unchecked.defaultof<User> then
+                let query = {qType="mention"; qName="@"+mUser.username; by=mUser.username}
+                async {
+                    try    
+                        let! response = getFeeds query
+                        response |> List.iter feeds.Add
+                    with error ->
+                        printfn "Exception Caught: %s" error.Message
+                        InfoText.Value <- (getErrorMessage error.Message)
+                }  |> Async.Start
+            else
+                InfoText.Value <- "Please login first"
+        ) 3000 |> ignore
 
         IndexTemplate.Main()
             .Info(
@@ -191,9 +218,6 @@ module Client =
                     }  |> Async.Start               
                     t.Vars.TweetText.Value <- ""     
             )
-            // .OnRetweet(fun t->
-                
-            // )
             .OnSearch(fun t ->
                 tweets.Clear()
                 let qName = t.Vars.QueryName.Value
@@ -227,7 +251,23 @@ module Client =
                     ).Doc()
                 )
             )
-            // .TweetText(newTweet)
-            
+            .Feeds(
+                feeds.View.DocSeqCached(fun (tweet: Tweet) ->
+                    let retweet = {id=""; reId=tweet.id; text=""; tType="retweet"; by=mUser.username}
+                    IndexTemplate.Feed()
+                        .Text(tweet.text)
+                        .OnRetweet(fun t->
+                            async {
+                                try    
+                                    let! response = postTweet retweet
+                                    InfoText.Value <- "You retweeted"
+                                    printfn "response=%A" response
+                                with error ->
+                                    printfn "Exception Caught: %s" error.Message
+                                    InfoText.Value <- "Your tweet wasn't posted"                        
+                            }  |> Async.Start
+                    ).Doc()
+                )    
+            )            
             .Doc()
         |> Doc.RunById "main"

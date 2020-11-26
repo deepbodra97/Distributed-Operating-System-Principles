@@ -367,7 +367,7 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
 (function()
 {
  "use strict";
- var Global,Client,Client$1,WebSharper,Unchecked,Obj,UI,Var$1,ListModel,List,T,ClientSideJson,Provider,Operators,Templating,Runtime,Server,TemplateInstance,Arrays,ProviderBuilder,View,Var,Handler,GeneratedPrintf,Client_Templates,Utils,ConcreteVar,Snap,Storage,Seq,JavaScript,Pervasives,Concurrency,Strings,System,Guid,Collections,List$1,Dictionary,JS,Client$2,Templates,Doc,Abbrev,Fresh,ArrayStorage,AsyncBody,Object,AttrProxy,CheckedInput,Numeric,SC$1,CT,HashSet,TemplateInitializer,EventTarget,Node,Enumerator,Scheduler,DictionaryUtil,CancellationTokenSource,T$1,SC$2,WindowOrWorkerGlobalScope,Docs,SC$3,Error,OperationCanceledException,DocElemNode,CharacterData,Elt,Prepare,Slice,DomUtility,KeyCollection,An,Settings,Mailbox,Attrs,Dyn,Queue,Array,Attrs$1,AttrModule,Updates,ValueCollection,Docs$1,RunState,NodeSet,Anims,SC$4,HashSetUtil,BindVar,SC$5,SC$6,AppendList,SC$7,DynamicAttrNode,Easing,HashSet$1,String,DomNodes,Char,Lazy,SC$8,LazyExtensionsProxy,LazyRecord,console,JSON,$,IntelliFactory,Runtime$1,Math,Date;
+ var Global,Client,Client$1,WebSharper,Unchecked,Obj,UI,Var$1,ListModel,List,T,ClientSideJson,Provider,Operators,JavaScript,JS,Utils,Var,Templating,Runtime,Server,TemplateInstance,Arrays,ProviderBuilder,View,Handler,GeneratedPrintf,Client_Templates,ConcreteVar,Snap,Storage,Seq,Pervasives,Concurrency,Strings,System,Guid,Collections,List$1,Dictionary,Client$2,Templates,Doc,Abbrev,Fresh,ArrayStorage,AsyncBody,SC$1,CT,Object,AttrProxy,CheckedInput,Numeric,HashSet,TemplateInitializer,EventTarget,Node,Enumerator,Scheduler,CancellationTokenSource,DictionaryUtil,T$1,SC$2,WindowOrWorkerGlobalScope,Docs,SC$3,Error,OperationCanceledException,DocElemNode,CharacterData,Elt,Prepare,Slice,DomUtility,KeyCollection,An,Settings,Mailbox,Attrs,Dyn,Queue,Array,Attrs$1,AttrModule,Updates,ValueCollection,Docs$1,RunState,NodeSet,Anims,SC$4,HashSetUtil,BindVar,SC$5,SC$6,AppendList,SC$7,DynamicAttrNode,Easing,HashSet$1,String,DomNodes,Char,Lazy,SC$8,LazyExtensionsProxy,LazyRecord,console,JSON,$,IntelliFactory,Runtime$1,Math,Date;
  Global=self;
  Client=Global.Client=Global.Client||{};
  Client$1=Client.Client=Client.Client||{};
@@ -382,6 +382,10 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  ClientSideJson=WebSharper.ClientSideJson=WebSharper.ClientSideJson||{};
  Provider=ClientSideJson.Provider=ClientSideJson.Provider||{};
  Operators=WebSharper.Operators=WebSharper.Operators||{};
+ JavaScript=WebSharper.JavaScript=WebSharper.JavaScript||{};
+ JS=JavaScript.JS=JavaScript.JS||{};
+ Utils=WebSharper.Utils=WebSharper.Utils||{};
+ Var=UI.Var=UI.Var||{};
  Templating=UI.Templating=UI.Templating||{};
  Runtime=Templating.Runtime=Templating.Runtime||{};
  Server=Runtime.Server=Runtime.Server||{};
@@ -389,16 +393,13 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  Arrays=WebSharper.Arrays=WebSharper.Arrays||{};
  ProviderBuilder=Server.ProviderBuilder=Server.ProviderBuilder||{};
  View=UI.View=UI.View||{};
- Var=UI.Var=UI.Var||{};
  Handler=Server.Handler=Server.Handler||{};
  GeneratedPrintf=Global.GeneratedPrintf=Global.GeneratedPrintf||{};
  Client_Templates=Global.Client_Templates=Global.Client_Templates||{};
- Utils=WebSharper.Utils=WebSharper.Utils||{};
  ConcreteVar=UI.ConcreteVar=UI.ConcreteVar||{};
  Snap=UI.Snap=UI.Snap||{};
  Storage=UI.Storage=UI.Storage||{};
  Seq=WebSharper.Seq=WebSharper.Seq||{};
- JavaScript=WebSharper.JavaScript=WebSharper.JavaScript||{};
  Pervasives=JavaScript.Pervasives=JavaScript.Pervasives||{};
  Concurrency=WebSharper.Concurrency=WebSharper.Concurrency||{};
  Strings=WebSharper.Strings=WebSharper.Strings||{};
@@ -407,7 +408,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  Collections=WebSharper.Collections=WebSharper.Collections||{};
  List$1=Collections.List=Collections.List||{};
  Dictionary=Collections.Dictionary=Collections.Dictionary||{};
- JS=JavaScript.JS=JavaScript.JS||{};
  Client$2=UI.Client=UI.Client||{};
  Templates=Client$2.Templates=Client$2.Templates||{};
  Doc=UI.Doc=UI.Doc||{};
@@ -415,20 +415,20 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  Fresh=Abbrev.Fresh=Abbrev.Fresh||{};
  ArrayStorage=Storage.ArrayStorage=Storage.ArrayStorage||{};
  AsyncBody=Concurrency.AsyncBody=Concurrency.AsyncBody||{};
+ SC$1=Global.StartupCode$WebSharper_Main$Concurrency=Global.StartupCode$WebSharper_Main$Concurrency||{};
+ CT=Concurrency.CT=Concurrency.CT||{};
  Object=Global.Object;
  AttrProxy=UI.AttrProxy=UI.AttrProxy||{};
  CheckedInput=UI.CheckedInput=UI.CheckedInput||{};
  Numeric=WebSharper.Numeric=WebSharper.Numeric||{};
- SC$1=Global.StartupCode$WebSharper_Main$Concurrency=Global.StartupCode$WebSharper_Main$Concurrency||{};
- CT=Concurrency.CT=Concurrency.CT||{};
  HashSet=Collections.HashSet=Collections.HashSet||{};
  TemplateInitializer=Server.TemplateInitializer=Server.TemplateInitializer||{};
  EventTarget=Global.EventTarget;
  Node=Global.Node;
  Enumerator=WebSharper.Enumerator=WebSharper.Enumerator||{};
  Scheduler=Concurrency.Scheduler=Concurrency.Scheduler||{};
- DictionaryUtil=Collections.DictionaryUtil=Collections.DictionaryUtil||{};
  CancellationTokenSource=WebSharper.CancellationTokenSource=WebSharper.CancellationTokenSource||{};
+ DictionaryUtil=Collections.DictionaryUtil=Collections.DictionaryUtil||{};
  T$1=Enumerator.T=Enumerator.T||{};
  SC$2=Global.StartupCode$WebSharper_UI$Templates=Global.StartupCode$WebSharper_UI$Templates||{};
  WindowOrWorkerGlobalScope=Global.WindowOrWorkerGlobalScope;
@@ -484,7 +484,7 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  Date=Global.Date;
  Client$1.Main=function()
  {
-  var mUser,InfoText,tweets,a,b,Q,_this,t,t$1,t$2,t$3,t$4,I,_this$1,p,i;
+  var mUser,InfoText,tweets,feeds,a,b,F,_this,Q,_this$1,t,t$1,t$2,t$3,t$4,I,_this$2,p,i;
   function registerUser(user)
   {
    var b$1;
@@ -564,6 +564,30 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
     });
    });
   }
+  function getFeeds(query)
+  {
+   var query$1,b$1;
+   (function($1)
+   {
+    return $1("Requesting feeds");
+   }(function(s)
+   {
+    console.log(s);
+   }));
+   query$1={
+    qType:"subscription",
+    qName:"",
+    by:mUser.username
+   };
+   b$1=null;
+   return Concurrency.Delay(function()
+   {
+    return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/tweets/search",JSON.stringify(((Provider.Id())())(query$1))),function(a$1)
+    {
+     return Concurrency.Return(((Provider.DecodeList(Provider.Id()))())(JSON.parse(a$1)));
+    });
+   });
+  }
   function searchTweets(query)
   {
    var b$1;
@@ -593,9 +617,97 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
   {
    return tweet.id;
   },T.Empty);
-  a=(b=(Q=Doc.Convert(function(tweet)
+  feeds=ListModel.Create(function(tweet)
   {
-   var retweet,b$1,t$5,_this$2,p$1,i$1;
+   return tweet.id;
+  },T.Empty);
+  Global.setInterval(function()
+  {
+   var query,b$1;
+   if(!Unchecked.Equals(mUser,null))
+    {
+     query={
+      qType:"subscription",
+      qName:"",
+      by:mUser.username
+     };
+     Concurrency.Start((b$1=null,Concurrency.Delay(function()
+     {
+      return Concurrency.TryWith(Concurrency.Delay(function()
+      {
+       return Concurrency.Bind(getFeeds(query),function(a$1)
+       {
+        List.iter(function(a$2)
+        {
+         feeds.Append(a$2);
+        },a$1);
+        return Concurrency.Zero();
+       });
+      }),function(a$1)
+      {
+       ((function($1)
+       {
+        return function($2)
+        {
+         return $1("Exception Caught: "+Utils.toSafe($2));
+        };
+       }(function(s)
+       {
+        console.log(s);
+       }))(a$1.message));
+       InfoText.Set(getErrorMessage(a$1.message));
+       return Concurrency.Zero();
+      });
+     })),null);
+    }
+   else
+    InfoText.Set("Please login first");
+  },3000);
+  Global.setInterval(function()
+  {
+   var query,b$1;
+   if(!Unchecked.Equals(mUser,null))
+    {
+     query={
+      qType:"mention",
+      qName:"@"+mUser.username,
+      by:mUser.username
+     };
+     Concurrency.Start((b$1=null,Concurrency.Delay(function()
+     {
+      return Concurrency.TryWith(Concurrency.Delay(function()
+      {
+       return Concurrency.Bind(getFeeds(query),function(a$1)
+       {
+        List.iter(function(a$2)
+        {
+         feeds.Append(a$2);
+        },a$1);
+        return Concurrency.Zero();
+       });
+      }),function(a$1)
+      {
+       ((function($1)
+       {
+        return function($2)
+        {
+         return $1("Exception Caught: "+Utils.toSafe($2));
+        };
+       }(function(s)
+       {
+        console.log(s);
+       }))(a$1.message));
+       InfoText.Set(getErrorMessage(a$1.message));
+       return Concurrency.Zero();
+      });
+     })),null);
+    }
+   else
+    InfoText.Set("Please login first");
+  },3000);
+  a=(b=(F=Doc.Convert(function(tweet)
+  {
+   var retweet,b$1,t$5,_this$3,p$1,i$1;
    retweet={
     id:"",
     reId:tweet.id,
@@ -603,11 +715,11 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
     tType:"retweet",
     by:mUser.username
    };
-   return(b$1=(t$5=(_this$2=new ProviderBuilder.New$1(),(_this$2.h.push({
+   return(b$1=(t$5=(_this$3=new ProviderBuilder.New$1(),(_this$3.h.push({
     $:1,
     $0:"text",
     $1:tweet.text
-   }),_this$2)),(t$5.h.push(Handler.EventQ2(t$5.k,"onretweet",function()
+   }),_this$3)),(t$5.h.push(Handler.EventQ2(t$5.k,"onretweet",function()
    {
     return t$5.i;
    },function()
@@ -649,11 +761,67 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
      });
     })),null);
    })),t$5)),(p$1=Handler.CompleteHoles(b$1.k,b$1.h,[]),(i$1=new TemplateInstance.New(p$1[1],Client_Templates.tweet(p$1[0])),b$1.i=i$1,i$1))).get_Doc();
-  },tweets.v),(_this=(t=(t$1=(t$2=(t$3=(t$4=(I=View.Map(Global.id,InfoText.get_View()),(_this$1=new ProviderBuilder.New$1(),(_this$1.h.push({
+  },feeds.v),(_this=(Q=Doc.Convert(function(tweet)
+  {
+   var retweet,b$1,t$5,_this$3,p$1,i$1;
+   retweet={
+    id:"",
+    reId:tweet.id,
+    text:"",
+    tType:"retweet",
+    by:mUser.username
+   };
+   return(b$1=(t$5=(_this$3=new ProviderBuilder.New$1(),(_this$3.h.push({
+    $:1,
+    $0:"text",
+    $1:tweet.text
+   }),_this$3)),(t$5.h.push(Handler.EventQ2(t$5.k,"onretweet",function()
+   {
+    return t$5.i;
+   },function()
+   {
+    var b$2;
+    Concurrency.Start((b$2=null,Concurrency.Delay(function()
+    {
+     return Concurrency.TryWith(Concurrency.Delay(function()
+     {
+      return Concurrency.Bind(postTweet(retweet),function(a$1)
+      {
+       InfoText.Set("You retweeted");
+       ((function($1)
+       {
+        return function($2)
+        {
+         return $1("response="+GeneratedPrintf.p($2));
+        };
+       }(function(s)
+       {
+        console.log(s);
+       }))(a$1));
+       return Concurrency.Zero();
+      });
+     }),function(a$1)
+     {
+      ((function($1)
+      {
+       return function($2)
+       {
+        return $1("Exception Caught: "+Utils.toSafe($2));
+       };
+      }(function(s)
+      {
+       console.log(s);
+      }))(a$1.message));
+      InfoText.Set("Your tweet wasn't posted");
+      return Concurrency.Zero();
+     });
+    })),null);
+   })),t$5)),(p$1=Handler.CompleteHoles(b$1.k,b$1.h,[]),(i$1=new TemplateInstance.New(p$1[1],Client_Templates.tweet(p$1[0])),b$1.i=i$1,i$1))).get_Doc();
+  },tweets.v),(_this$1=(t=(t$1=(t$2=(t$3=(t$4=(I=View.Map(Global.id,InfoText.get_View()),(_this$2=new ProviderBuilder.New$1(),(_this$2.h.push({
    $:2,
    $0:"info",
    $1:I
-  }),_this$1))),(t$4.h.push(Handler.EventQ2(t$4.k,"onregister",function()
+  }),_this$2))),(t$4.h.push(Handler.EventQ2(t$4.k,"onregister",function()
   {
    return t$4.i;
   },function(t$5)
@@ -861,10 +1029,14 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
      return Concurrency.Zero();
     });
    })),null);
-  })),t)),(_this.h.push({
+  })),t)),(_this$1.h.push({
    $:0,
    $0:"queryresults",
    $1:Q
+  }),_this$1))),(_this.h.push({
+   $:0,
+   $0:"feeds",
+   $1:F
   }),_this))),(p=Handler.CompleteHoles(b.k,b.h,[["regusername",0],["regpassword",0],["regconfirmpassword",0],["logusername",0],["logpassword",0],["publisher",0],["tweettext",0],["queryname",0]]),(i=new TemplateInstance.New(p[1],Client_Templates.main(p[0])),b.i=i,i))).get_Doc();
   Templates.LoadLocalTemplates("");
   Doc.RunById("main",a);
@@ -1216,6 +1388,78 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  {
   return[kvp.K,kvp.V];
  };
+ JS.GetFields=function(o)
+ {
+  var r,k;
+  r=[];
+  for(var k$1 in o)r.push([k$1,o[k$1]]);
+  return r;
+ };
+ JS.GetFieldValues=function(o)
+ {
+  var r,k;
+  r=[];
+  for(var k$1 in o)r.push(o[k$1]);
+  return r;
+ };
+ List.iter=function(f,l)
+ {
+  var r;
+  r=l;
+  while(r.$==1)
+   {
+    f(List.head(r));
+    r=List.tail(r);
+   }
+ };
+ List.init=function(s,f)
+ {
+  return List.ofArray(Arrays.init(s,f));
+ };
+ List.ofArray=function(arr)
+ {
+  var r,i,$1;
+  r=T.Empty;
+  for(i=Arrays.length(arr)-1,$1=0;i>=$1;i--)r=new T({
+   $:1,
+   $0:Arrays.get(arr,i),
+   $1:r
+  });
+  return r;
+ };
+ List.head=function(l)
+ {
+  return l.$==1?l.$0:List.listEmpty();
+ };
+ List.tail=function(l)
+ {
+  return l.$==1?l.$1:List.listEmpty();
+ };
+ List.listEmpty=function()
+ {
+  return Operators.FailWith("The input list was empty.");
+ };
+ Utils.toSafe=function(s)
+ {
+  return s==null?"":s;
+ };
+ Utils.prettyPrint=function(o)
+ {
+  var t,s;
+  function m(k,v)
+  {
+   return k+" = "+Utils.prettyPrint(v);
+  }
+  return o===null?"null":(t=typeof o,t=="string"?"\""+o+"\"":t=="object"?o instanceof Global.Array?"[|"+Strings.concat("; ",Arrays.map(Utils.prettyPrint,o))+"|]":(s=Global.String(o),s==="[object Object]"?"{"+Strings.concat("; ",Arrays.map(function($1)
+  {
+   return m($1[0],$1[1]);
+  },JS.GetFields(o)))+"}":s):Global.String(o));
+ };
+ Var=UI.Var=Runtime$1.Class({},Obj,Var);
+ Var.New=Runtime$1.Ctor(function()
+ {
+  Obj.New.call(this);
+ },Var);
  TemplateInstance=Server.TemplateInstance=Runtime$1.Class({
   get_Doc:function()
   {
@@ -1375,11 +1619,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    return Snap.Join(a());
   });
  };
- Var=UI.Var=Runtime$1.Class({},Obj,Var);
- Var.New=Runtime$1.Ctor(function()
- {
-  Obj.New.call(this);
- },Var);
  Handler.EventQ2=function(key,holeName,ti,f)
  {
   return{
@@ -1476,67 +1715,10 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    $0:"main"
   },h):void 0;
  };
- Utils.toSafe=function(s)
- {
-  return s==null?"":s;
- };
- Utils.prettyPrint=function(o)
- {
-  var t,s;
-  function m(k,v)
-  {
-   return k+" = "+Utils.prettyPrint(v);
-  }
-  return o===null?"null":(t=typeof o,t=="string"?"\""+o+"\"":t=="object"?o instanceof Global.Array?"[|"+Strings.concat("; ",Arrays.map(Utils.prettyPrint,o))+"|]":(s=Global.String(o),s==="[object Object]"?"{"+Strings.concat("; ",Arrays.map(function($1)
-  {
-   return m($1[0],$1[1]);
-  },JS.GetFields(o)))+"}":s):Global.String(o));
- };
- List.iter=function(f,l)
- {
-  var r;
-  r=l;
-  while(r.$==1)
-   {
-    f(List.head(r));
-    r=List.tail(r);
-   }
- };
- List.init=function(s,f)
- {
-  return List.ofArray(Arrays.init(s,f));
- };
- List.head=function(l)
- {
-  return l.$==1?l.$0:List.listEmpty();
- };
- List.tail=function(l)
- {
-  return l.$==1?l.$1:List.listEmpty();
- };
- List.ofArray=function(arr)
- {
-  var r,i,$1;
-  r=T.Empty;
-  for(i=Arrays.length(arr)-1,$1=0;i>=$1;i--)r=new T({
-   $:1,
-   $0:Arrays.get(arr,i),
-   $1:r
-  });
-  return r;
- };
- List.listEmpty=function()
- {
-  return Operators.FailWith("The input list was empty.");
- };
  ConcreteVar=UI.ConcreteVar=Runtime$1.Class({
   get_View:function()
   {
    return this.view;
-  },
-  Get:function()
-  {
-   return this.current;
   },
   Set:function(v)
   {
@@ -1558,6 +1740,10 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
       $1:[]
      });
     }
+  },
+  Get:function()
+  {
+   return this.current;
   },
   UpdateMaybe:function(f)
   {
@@ -2480,20 +2666,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
     e.Dispose();
   }
  },Dictionary);
- JS.GetFields=function(o)
- {
-  var r,k;
-  r=[];
-  for(var k$1 in o)r.push([k$1,o[k$1]]);
-  return r;
- };
- JS.GetFieldValues=function(o)
- {
-  var r,k;
-  r=[];
-  for(var k$1 in o)r.push(o[k$1]);
-  return r;
- };
  Templates.LoadLocalTemplates=function(baseName)
  {
   !Templates.LocalTemplatesLoaded()?(Templates.set_LocalTemplatesLoaded(true),Templates.LoadNestedTemplates(self.document.body,"")):void 0;
@@ -3336,6 +3508,14 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    }
   return res;
  };
+ Arrays.init=function(size,f)
+ {
+  var r,i,$1;
+  size<0?Operators.FailWith("Negative size given."):null;
+  r=new Global.Array(size);
+  for(i=0,$1=size-1;i<=$1;i++)r[i]=f(i);
+  return r;
+ };
  Arrays.map=function(f,arr)
  {
   var r,i,$1;
@@ -3352,14 +3532,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    m==null?void 0:q.push(m.$0);
   }
   return q;
- };
- Arrays.init=function(size,f)
- {
-  var r,i,$1;
-  size<0?Operators.FailWith("Negative size given."):null;
-  r=new Global.Array(size);
-  for(i=0,$1=size-1;i<=$1;i++)r[i]=f(i);
-  return r;
  };
  Arrays.ofList=function(xs)
  {
@@ -3482,6 +3654,28 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    ct:ct
   };
  };
+ SC$1.$cctor=function()
+ {
+  SC$1.$cctor=Global.ignore;
+  SC$1.noneCT=CT.New(false,[]);
+  SC$1.scheduler=new Scheduler.New();
+  SC$1.defCTS=[new CancellationTokenSource.New()];
+  SC$1.Zero=Concurrency.Return();
+  SC$1.GetCT=function(c)
+  {
+   c.k({
+    $:0,
+    $0:c.ct
+   });
+  };
+ };
+ CT.New=function(IsCancellationRequested,Registrations)
+ {
+  return{
+   c:IsCancellationRequested,
+   r:Registrations
+  };
+ };
  AttrProxy=UI.AttrProxy=Runtime$1.Class({},null,AttrProxy);
  AttrProxy.Handler=function(event,q)
  {
@@ -3523,28 +3717,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
  Numeric.TryParseInt32=function(s,r)
  {
   return Numeric.TryParse(s,-2147483648,2147483647,r);
- };
- SC$1.$cctor=function()
- {
-  SC$1.$cctor=Global.ignore;
-  SC$1.noneCT=CT.New(false,[]);
-  SC$1.scheduler=new Scheduler.New();
-  SC$1.defCTS=[new CancellationTokenSource.New()];
-  SC$1.Zero=Concurrency.Return();
-  SC$1.GetCT=function(c)
-  {
-   c.k({
-    $:0,
-    $0:c.ct
-   });
-  };
- };
- CT.New=function(IsCancellationRequested,Registrations)
- {
-  return{
-   c:IsCancellationRequested,
-   r:Registrations
-  };
  };
  HashSet=Collections.HashSet=Runtime$1.Class({
   Add:function(item)
@@ -3776,10 +3948,6 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
   this.idle=true;
   this.robin=[];
  },Scheduler);
- DictionaryUtil.notPresent=function()
- {
-  return Operators.FailWith("The given key was not present in the dictionary.");
- };
  CancellationTokenSource=WebSharper.CancellationTokenSource=Runtime$1.Class({},Obj,CancellationTokenSource);
  CancellationTokenSource.New=Runtime$1.Ctor(function()
  {
@@ -3789,6 +3957,10 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
   this.r=[];
   this.init=1;
  },CancellationTokenSource);
+ DictionaryUtil.notPresent=function()
+ {
+  return Operators.FailWith("The given key was not present in the dictionary.");
+ };
  T$1=Enumerator.T=Runtime$1.Class({
   MoveNext:function()
   {

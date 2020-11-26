@@ -5,16 +5,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="Content/Client.css" />
-    <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
-    <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-    <!-- Popper JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-
-    <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> 
     <style>
         /* Don't show the not-yet-loaded templates */
@@ -23,16 +16,14 @@
     <script type="text/javascript" src="Content/Client.head.js"></script>
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm bg-primary navbar-dark">
-        <ul class="navbar-nav">
-            <li class="nav-item active">
-                <a class="nav-link" href="#">Twitter</a>
-            </li>
-        </ul>
+    <nav class="navbar navbar-expand-sm bg-primary navbar-dark" style="height:50px">
+        <div class="navbar-nav" style="position: absolute; left: 45%;">
+            <h2 class="nav-link active">TWITTER</h2>
+        </div>
     </nav>
     <div id="main" ws-children-template="Main">
-        <div>
-            <div ws-hole="Info">${Text}</div>
+        <div class="alert alert-info">
+            <div ws-hole="Info" class="text-center">${Text}</div>
         </div>
         <div class="container p-1">
             <form class="form-inline">
@@ -75,21 +66,42 @@
                 <button ws-onclick="OnTweet" type="button" class="btn btn-primary">Tweet</button>
             </form>
         </div>
-        <div class="container p-1">
-            <form class="form-inline">
-                <div class="form-group">
-                    <input ws-var="QueryName" type="text" class="form-control" placeholder="Query" />
+        <div class="container p-3">
+            <div class="row">
+                <div class="container p-1 col-md-6 border">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <input ws-var="QueryName" type="text" class="form-control" placeholder="Query" />
+                        </div>
+                        <button ws-onclick="OnSearch" type="button" class="btn btn-primary">Search</button>
+                    </form>
+                    <div class="container" >
+                        <div ws-hole="QueryResults">
+                            <p>Search Results</p>
+                            <div ws-template="Tweet" class="container p-1">
+                                <div class="row">
+                                    <div class="container col-md-6">${Text}</div>
+                                    <div class="container col-md-6"><button ws-onclick="OnRetweet" class="btn btn-primary btn-sm" style="float: right;">Retweet</button></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button ws-onclick="OnSearch" type="button" class="btn btn-primary">Search</button>
-            </form>
-            <div ws-hole="QueryResults">
-                <div ws-template="Tweet">
-                    <span>${Text}</span>
-                    <button ws-onclick="OnRetweet" class="btn btn-primary">Retweet</button>
+                <div class="container p-1 col-md-6 border">
+                    <p class="text-center">Your Feeds</p>
+                    <div class="container" >
+                        <div ws-hole="Feeds">
+                            <div ws-template="Feed" class="container p-1">
+                                <div class="row">
+                                    <div class="container col-md-6">${Text}</div>
+                                    <div class="container col-md-6"><button ws-onclick="OnRetweet" class="btn btn-primary btn-sm" style="float: right;">Retweet</button></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
                 </div>
             </div>
-        </div>
-           
         </div>
     </div>
     <script type="text/javascript" src="Content/Client.min.js"></script>
