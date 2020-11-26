@@ -76,8 +76,7 @@ module Client =
 
         let mutable mUser = Unchecked.defaultof<User>
 
-        let InfoRegisterText = Var.Create ""
-        let InfoLoginText = Var.Create ""
+        let InfoText = Var.Create ""
 
         // User
         // Register
@@ -90,14 +89,13 @@ module Client =
             }
             
         // Login
-        let loginUser (user: User) =
+        let loginUser (user: User): Id Async =
             printfn "Sending login request to server"
-            mUser <- user
-            // async {
-            //     let! response = Ajax "POST" "http://localhost:5000/api/users" (Json.Serialize user)
-            //     mUser <- user
-            //     return Json.Deserialize response
-            // } |> Async.Start
+            async {
+                let! response = Ajax "POST" "http://localhost:5000/api/users/login" (Json.Serialize user)
+                mUser <- user
+                return Json.Deserialize<Id> response
+            }
 
         // Subscribe
         let subscribeTo (subscribe: Subscribe) =
@@ -113,12 +111,12 @@ module Client =
         let addTweet (tweet: Tweet) =
             tweets.Add(tweet)
         
-        let postTweet (tweet: Tweet) =
+        let postTweet (tweet: Tweet) : Id Async=
             printfn "Sending tweet to server"
             async {
                 let! response = Ajax "POST" "http://localhost:5000/api/tweets" (Json.Serialize tweet)
-                return Json.Deserialize response
-            } |> Async.Start
+                return Json.Deserialize<Id> response
+            }
 
         let searchTweets (query: QueryTweet): Tweet list Async =
             printfn "Sending query to server"
@@ -127,42 +125,76 @@ module Client =
                 return Json.Deserialize<Tweet list> response
             }
 
+        let getErrorMessage (error: string) =
+            error.Replace("{\"error\":\"", "").Replace("\"}", "")
+
         // let newTweet = {id=""; reId=""; text="client"; tType="tweet"; by="deep"}
         IndexTemplate.Main()
-            .InfoRegister(
-                View.Map id InfoRegisterText.View
+            .Info(
+                View.Map id InfoText.View
             )
             .OnRegister(fun t->
-                let newUser = {id=0; username=t.Vars.RegUsername.Value; password=t.Vars.RegPassword.Value}
-                async {
-                    try    
-                        let! response = registerUser newUser
-                        InfoRegisterText.Value <- "Success"
-                        printfn "response=%A" response
-                    with error ->
-                        printfn "Exception Caught: %s" error.Message
-                        InfoRegisterText.Value <- "Failure"                        
-                }  |> Async.Start
-                t.Vars.RegUsername.Value <- ""
-                t.Vars.RegPassword.Value <- ""
-                t.Vars.RegConfirmPassword.Value <- ""
-                
-                // JS.Alert(++t.Vars.RegConfirmPassword.Value)
+                if t.Vars.RegUsername.Value = "" || t.Vars.RegPassword.Value = "" || t.Vars.RegConfirmPassword.Value = "" then
+                    InfoText.Value <- "Fields cannot be left empty"
+                else if t.Vars.RegPassword.Value <> t.Vars.RegConfirmPassword.Value then
+                    InfoText.Value <- "Passwords don't match"
+                else
+                    let newUser = {id=0; username=t.Vars.RegUsername.Value; password=t.Vars.RegPassword.Value}
+                    async {
+                        try    
+                            let! response = registerUser newUser
+                            InfoText.Value <- "Your account was created"
+                            printfn "response=%A" response
+                        with error ->
+                            printfn "Exception Caught: %s" error.Message
+                            InfoText.Value <- getErrorMessage error.Message
+                    }  |> Async.Start
+                    t.Vars.RegUsername.Value <- ""
+                    t.Vars.RegPassword.Value <- ""
+                    t.Vars.RegConfirmPassword.Value <- ""
             )
             .OnLogin(fun t->
-                let user = {id=0; username=t.Vars.LogUsername.Value; password=t.Vars.LogPassword.Value}
-                loginUser user
+                if t.Vars.LogUsername.Value = "" || t.Vars.LogPassword.Value = "" then do
+                    InfoText.Value <- "Fields cannot be left empty"
+                else
+                    let user = {id=0; username=t.Vars.LogUsername.Value; password=t.Vars.LogPassword.Value}
+                    async {
+                        try    
+                            let! response = loginUser user
+                            InfoText.Value <- ("Hi " + user.username + "!")
+                            printfn "response=%A" response
+                        with error ->
+                            printfn "Exception Caught: %s" error.Message
+                            InfoText.Value <- getErrorMessage error.Message                     
+                    }  |> Async.Start
+                    t.Vars.LogUsername.Value <- ""
+                    t.Vars.LogPassword.Value <- ""
             )
             .OnSubscribe(fun t->
                 let newSubscribe = {publisher=t.Vars.Publisher.Value; subscriber=mUser.username}
                 subscribeTo newSubscribe
             )
             .OnTweet(fun t ->
-                // tweets.Add({newTweet with id=newName.Value})
-                // addTweet {newTweet with id=newName.Value}
-                let newTweet = {id=""; reId=""; text=t.Vars.TweetText.Value; tType="tweet"; by=mUser.username}
-                postTweet newTweet
+                if mUser = Unchecked.defaultof<User> then
+                    InfoText.Value <- "Please login/register to tweet"
+                else if t.Vars.TweetText.Value = "" then
+                    InfoText.Value <- "You cannot post empty tweet"
+                else
+                    let newTweet = {id=""; reId=""; text=t.Vars.TweetText.Value; tType="tweet"; by=mUser.username}
+                    async {
+                        try    
+                            let! response = postTweet newTweet
+                            InfoText.Value <- "Your tweet was posted"
+                            printfn "response=%A" response
+                        with error ->
+                            printfn "Exception Caught: %s" error.Message
+                            InfoText.Value <- "Your tweet wasn't posted"                        
+                    }  |> Async.Start               
+                    t.Vars.TweetText.Value <- ""     
             )
+            // .OnRetweet(fun t->
+                
+            // )
             .OnSearch(fun t ->
                 tweets.Clear()
                 let qName = t.Vars.QueryName.Value
@@ -180,7 +212,20 @@ module Client =
             )
             .QueryResults(
                 tweets.View.DocSeqCached(fun (tweet: Tweet) ->
-                    IndexTemplate.Tweet().Text(tweet.text).Doc()
+                    let retweet = {id=""; reId=tweet.id; text=""; tType="retweet"; by=mUser.username}
+                    IndexTemplate.Tweet()
+                        .Text(tweet.text)
+                        .OnRetweet(fun t->
+                            async {
+                                try    
+                                    let! response = postTweet retweet
+                                    InfoText.Value <- "You retweeted"
+                                    printfn "response=%A" response
+                                with error ->
+                                    printfn "Exception Caught: %s" error.Message
+                                    InfoText.Value <- "Your tweet wasn't posted"                        
+                            }  |> Async.Start
+                    ).Doc()
                 )
             )
             // .TweetText(newTweet)

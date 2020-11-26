@@ -5,6 +5,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="Content/Client.css" />
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> 
     <style>
         /* Don't show the not-yet-loaded templates */
         /* [ws-template], [ws-children-template] { display: none; } */
@@ -15,14 +26,15 @@
     <h1>TWITTER</h1>
     <div id="main" ws-children-template="Main">
         <div>
-            <div ws-hole="InfoRegister">${Info}</div>
+            <div ws-hole="Info">${Text}</div>
+        </div>
+        <div>            
             <input ws-var="RegUsername" type="text" placeholder="Username" />
             <input ws-var="RegPassword" type="password" placeholder="Password" />
             <input ws-var="RegConfirmPassword" type="password" placeholder="Password" />
             <button ws-onclick="OnRegister">Register</button>
         </div>
         <div>
-            <div ws-hole="Info">${Info}</div>
             <input ws-var="LogUsername" type="text" placeholder="Username" />
             <input ws-var="LogPassword" type="password" placeholder="Password" />
             <button ws-onclick="OnLogin">Login</button>
@@ -40,9 +52,12 @@
             <h2>Query</h2>
             <input ws-var="QueryName" placeholder="Query" />
             <button ws-onclick="OnSearch">Search</button>
-            <ul ws-hole="QueryResults">
-                <li ws-template="Tweet">${Text}</li>
-            </ul>
+            <div ws-hole="QueryResults">
+                <div ws-template="Tweet">
+                    <span>${Text}</span>
+                    <button ws-onclick="OnRetweet">Retweet</button>
+                </div>
+            </div>
         </div>
     </div>
     <script type="text/javascript" src="Content/Client.min.js"></script>
