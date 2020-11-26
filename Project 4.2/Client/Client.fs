@@ -128,7 +128,6 @@ module Client =
         let getErrorMessage (error: string) =
             error.Replace("{\"error\":\"", "").Replace("\"}", "")
 
-        // let newTweet = {id=""; reId=""; text="client"; tType="tweet"; by="deep"}
         IndexTemplate.Main()
             .Info(
                 View.Map id InfoText.View
@@ -147,7 +146,7 @@ module Client =
                             printfn "response=%A" response
                         with error ->
                             printfn "Exception Caught: %s" error.Message
-                            InfoText.Value <- getErrorMessage error.Message
+                            InfoText.Value <- (getErrorMessage error.Message)
                     }  |> Async.Start
                     t.Vars.RegUsername.Value <- ""
                     t.Vars.RegPassword.Value <- ""
