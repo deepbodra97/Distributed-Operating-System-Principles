@@ -588,7 +588,7 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
   }
   function getFeeds(query)
   {
-   var query$1,b$1;
+   var b$1;
    (function($1)
    {
     return $1("Requesting feeds");
@@ -596,15 +596,10 @@ if(!p.closest){p.closest=function(s){var e=this;while(e&&e.nodeType==1){if(e.mat
    {
     console.log(s);
    }));
-   query$1={
-    qType:"subscription",
-    qName:"",
-    by:mUser.username
-   };
    b$1=null;
    return Concurrency.Delay(function()
    {
-    return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/tweets/search",JSON.stringify(((Provider.Id())())(query$1))),function(a$1)
+    return Concurrency.Bind(Client$1.Ajax("POST","http://localhost:5000/api/tweets/search",JSON.stringify(((Provider.Id())())(query))),function(a$1)
     {
      return Concurrency.Return(((Provider.DecodeList(Provider.Id()))())(JSON.parse(a$1)));
     });

@@ -116,9 +116,8 @@ module Client =
                 return Json.Deserialize<Tweet list> response
             }
         
-        let getFeeds query =
+        let getFeeds (query: QueryTweet) =
             printfn "Requesting feeds"
-            let query = {qType="subscription"; qName=""; by=mUser.username}
             async {
                 let! response = Ajax "POST" "http://localhost:5000/api/tweets/search" (Json.Serialize query)
                 return Json.Deserialize<Tweet list> response
