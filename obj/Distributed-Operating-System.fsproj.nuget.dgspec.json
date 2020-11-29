@@ -43,11 +43,31 @@
             },
             "Extreme.Numerics.FSharp": {
               "target": "Package",
-              "version": "[7.0.0, )"
+              "version": "[7.0.0, )",
+              "generatePathProperty": true
             },
             "FSharp.Core": {
               "target": "Package",
               "version": "[4.7.2, )",
+              "generatePathProperty": true
+            },
+            "WebSharper": {
+              "target": "Package",
+              "version": "[4.6.7.408, )",
+              "generatePathProperty": true
+            },
+            "Websharper.AspNetCore": {
+              "target": "Package",
+              "version": "[*, )"
+            },
+            "Websharper.FSharp": {
+              "target": "Package",
+              "version": "[4.6.7.408, )",
+              "generatePathProperty": true
+            },
+            "Websharper.UI": {
+              "target": "Package",
+              "version": "[4.6.3.219, )",
               "generatePathProperty": true
             }
           },

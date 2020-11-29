@@ -121,7 +121,6 @@ module Backend =
     // Create User
     let CreateUser (data: User) : ApiResult<Id> =
         lock usersMap <| fun () ->
-            // incr lastId
             match usersMap.TryGetValue(data.username) with
             | true, _ ->
                 printfn "UserCreationError: User already exists"
@@ -140,12 +139,6 @@ module Backend =
                     wrongPassword()
             | false, _ ->
                 userNotFound()
-
-    let GetUser (username: string) : ApiResult<User> =
-        lock usersMap <| fun () ->
-            match usersMap.TryGetValue(username) with
-            | true, user -> Ok user
-            | false, _ -> userNotFound()
     
     let SubscribeTo (subscribe: Subscribe) : ApiResult<Id> =
         if not (subscriptionsMap.ContainsKey(subscribe.subscriber)) then    

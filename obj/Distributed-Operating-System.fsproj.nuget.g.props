@@ -17,7 +17,11 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">C:\Users\Deepb\.nuget\packages\fsharp.core\4.7.2</PkgFSharp_Core>
+    <PkgWebSharper Condition=" '$(PkgWebSharper)' == '' ">C:\Users\Deepb\.nuget\packages\websharper\4.6.7.408</PkgWebSharper>
+    <PkgWebSharper_UI Condition=" '$(PkgWebSharper_UI)' == '' ">C:\Users\Deepb\.nuget\packages\websharper.ui\4.6.3.219</PkgWebSharper_UI>
+    <PkgWebSharper_FSharp Condition=" '$(PkgWebSharper_FSharp)' == '' ">C:\Users\Deepb\.nuget\packages\websharper.fsharp\4.6.7.408</PkgWebSharper_FSharp>
     <PkgExtreme_Numerics Condition=" '$(PkgExtreme_Numerics)' == '' ">C:\Users\Deepb\.nuget\packages\extreme.numerics\7.0.0</PkgExtreme_Numerics>
+    <PkgExtreme_Numerics_FSharp Condition=" '$(PkgExtreme_Numerics_FSharp)' == '' ">C:\Users\Deepb\.nuget\packages\extreme.numerics.fsharp\7.0.0</PkgExtreme_Numerics_FSharp>
     <PkgAkka Condition=" '$(PkgAkka)' == '' ">C:\Users\Deepb\.nuget\packages\akka\1.4.10</PkgAkka>
     <PkgAkka_Serialization_Hyperion Condition=" '$(PkgAkka_Serialization_Hyperion)' == '' ">C:\Users\Deepb\.nuget\packages\akka.serialization.hyperion\1.4.10</PkgAkka_Serialization_Hyperion>
   </PropertyGroup>

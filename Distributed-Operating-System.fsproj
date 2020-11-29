@@ -14,6 +14,10 @@
     <PackageReference Include="Akka" Version="1.4.10" />
     <PackageReference Include="Akka.Serialization.Hyperion" Version="1.4.10" />
     <PackageReference Include="Extreme.Numerics.FSharp" Version="7.0.0" />
+    <PackageReference Include="WebSharper" Version="4.6.7.408" />
+    <PackageReference Include="Websharper.AspNetCore" Version="4.6.2.136" />
+    <PackageReference Include="Websharper.FSharp" Version="4.6.7.408" />
+    <PackageReference Include="Websharper.UI" Version="4.6.3.219" />
   </ItemGroup>
 
 </Project>
