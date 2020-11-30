@@ -209,10 +209,10 @@ let main numNodes =
                                 mLogout ()
                             elif rnd <= (behaviorPercentReader.[1]-behaviorPercentReader.[0]) then // query with p=0.80
                                 mQuery ()
-                            else // post with p=0.8
+                            else // post with p=0.2
                                 mTweet ()  
                         else // if logged out
-                            if rnd <= (100-behaviorPercentReader.[0]) then // login with p=0.15
+                            if rnd <= (100-behaviorPercentReader.[0]) then // login with p=0.95
                                 mLogin ()
                         let nextTickTime = getRandomInt tickRangeReader.[0] tickRangeReader.[1] |> float
                         system.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.Zero, (TimeSpan.FromMilliseconds(nextTickTime)), childMailbox.Self, (Tick), childMailbox.Self) |> ignore

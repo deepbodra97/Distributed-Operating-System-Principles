@@ -108,6 +108,8 @@ let main () =
                 let mutable lastTweetCount = 0.0 // previous tweet count
                 let mutable currentTweetCount = 0.0 // current tweet count
                 let mutable totalUsers = 0.0 // total no of users
+                let mutable lastRequestCount = 0.0
+                let mutable currentRequestCount = 0.0
 
                 let addTweet tweet = // add this tweet to the database
                     tweetsMap <- tweetsMap.Add(tweet.id, tweet) // add to tweets Map
@@ -142,6 +144,7 @@ let main () =
                     actor {   
                         let! (msg: Message) = mailbox.Receive() // fetch the message from the queue
                         let sender = mailbox.Sender()
+                        currentRequestCount <- currentRequestCount + 1.0
                         match msg with
                         | Register user ->
                             totalUsers <- totalUsers + 1.0
@@ -200,12 +203,15 @@ let main () =
                             | _ -> printfn "Invalid Query Type"
                             sender <! QueryResponse response
                         | PrintStats -> // Print Stats
+                            currentRequestCount <- currentRequestCount - 1.0 //  since this is not a client request..decrease 1
                             printfn "----------STATS----------"
+                            printfn "Requests per second: %f" ((currentRequestCount-lastRequestCount)/statsInterval)
                             printfn "Total Tweets: %f" currentTweetCount
                             printfn "Tweets per second: %f" ((currentTweetCount-lastTweetCount)/statsInterval)
                             printfn "Total Users: %f" totalUsers
                             printfn "Online Users: %d" onlineUsers.Count
                             lastTweetCount <- currentTweetCount
+                            lastRequestCount <- currentRequestCount
                         | _ -> return ()
                         return! loop()
                     }
