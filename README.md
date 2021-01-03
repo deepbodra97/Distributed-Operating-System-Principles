@@ -4,7 +4,7 @@
 This is a project for the course COP5612: Distributed Operating System Principles at the University of Florida
 
 # Demo
-[![Demo](https://github.com/deepbodra97/Database-System-Implementation/blob/master/P5:%20DeepDB/Database%20System%20Implementation%20(Demo).mp4%20-%20VLC%20media%20player%2024-04-2020%2000_08_41.png)](https://youtu.be/GNNfJR-8mD8)
+[![Demo](https://github.com/deepbodra97/Distributed-Operating-System-Principles/blob/master/Project%204.2/demo_thumbnail.PNG)](https://youtu.be/GNNfJR-8mD8)
 
 # Projects
 The TASK.pdf in each folder describes the requirements of the project in detail.
