@@ -3,7 +3,7 @@
 
 This is a project for the course COP5612: Distributed Operating System Principles at the University of Florida
 
-# Demo
+# Demo (Project 4.2)
 [![Demo](https://github.com/deepbodra97/Distributed-Operating-System-Principles/blob/master/Project%204.2/demo_thumbnail.PNG)](https://youtu.be/GNNfJR-8mD8)
 
 # Projects
